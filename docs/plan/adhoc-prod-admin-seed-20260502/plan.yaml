@@ -1,0 +1,415 @@
+plan_id: adhoc-prod-admin-seed-20260502
+objective: >-
+  Add Docker support to run PostgreSQL for this Laravel/Inertia app on a Hostinger VPS,
+  create a production deployment guide markdown file assuming nginx and certbot are already installed,
+  remove the user-facing register page and disable registration backend routes,
+  seed a bootstrap admin user with email admin@callme.wheels and password Callme123456!,
+  and prepare the project for production readiness.
+created_at: 2026-05-02T00:00:00Z
+created_by: GitHub Copilot GPT-5.4
+status: pending_approval
+research_confidence: high
+
+plan_metrics:
+  wave_1_task_count: 3
+  total_dependencies: 7
+  risk_score: medium
+
+tldr: |
+  - Keep the production scope narrow: add Docker only for PostgreSQL, not for PHP, nginx, or the frontend runtime.
+  - Reuse the existing Fortify feature gating to turn off registration links automatically, then remove the now-dead register page surface.
+  - Replace the current hard-coded test user seed with a dedicated, idempotent bootstrap admin seeder that marks the account verified.
+  - Make Inertia SSR production-safe by switching it to env-driven behavior so production does not point at a missing SSR runtime.
+  - Validate the change set with three narrow PHPUnit slices plus command-level deploy checks, then document the exact Hostinger flow.
+
+open_questions:
+  - Whether the bootstrap admin seed should remain in the default DatabaseSeeder for every environment or only be invoked in production bootstrap flows; this plan assumes it stays in DatabaseSeeder because that matches the requested scope.
+
+pre_mortem:
+  overall_risk_level: medium
+  critical_failure_modes:
+    - scenario: Production is switched to pgsql and SSR-aware config, but the app still tries to contact a missing SSR endpoint during deployment.
+      likelihood: medium
+      impact: high
+      mitigation: Make config/inertia.php env-driven and default production to a safe non-SSR path unless an explicit SSR runtime is provisioned and documented.
+    - scenario: Registration is only partially disabled, leaving an exposed register route or a dead link in the login or home flow.
+      likelihood: medium
+      impact: high
+      mitigation: Remove the Fortify registration feature, remove the register view callback, and add route-plus-Inertia assertions that prove the register surface is gone.
+    - scenario: The seeded admin account is created but cannot access the admin area because the app requires verified users.
+      likelihood: medium
+      impact: critical
+      mitigation: Seed email_verified_at with a current timestamp and assert the seeded credentials and verification state in a dedicated test.
+    - scenario: Docker support grows into full app containerization and increases deployment risk beyond the request.
+      likelihood: low
+      impact: medium
+      mitigation: Keep the compose file limited to PostgreSQL, persistent storage, health checks, and restart policy; leave nginx, PHP-FPM, and Node on the host.
+  assumptions:
+    - Hostinger VPS will run nginx, PHP-FPM, Composer, Node or pnpm, and certbot directly on the host.
+    - PostgreSQL is the only service that needs Docker support for this scope.
+    - Wayfinder-generated register helpers may remain as dead generated artifacts if they are no longer imported by runtime-critical code.
+    - The current admin area remains ownership-based; no role or admin flag schema work is required for the bootstrap account.
+
+implementation_specification:
+  code_structure: >-
+    Keep implementation in five narrow slices: production runtime config, registration shutdown,
+    bootstrap admin seeding, targeted regression coverage, and a Hostinger-specific deployment guide.
+    Prefer env-driven configuration over new abstractions, and do not introduce app containerization,
+    role systems, or a new deployment framework.
+  affected_areas:
+    - docker-compose.production.yml
+    - .env.example
+    - config/inertia.php
+    - config/fortify.php
+    - app/Providers/FortifyServiceProvider.php
+    - resources/js/pages/auth/register.tsx
+    - database/seeders/DatabaseSeeder.php
+    - database/seeders/BootstrapAdminUserSeeder.php
+    - tests/Feature/Auth/RegistrationDisabledTest.php
+    - tests/Feature/Database/BootstrapAdminSeederTest.php
+    - tests/Feature/Support/ProductionConfigurationTest.php
+    - docs/deployment/hostinger-vps.md
+  component_details:
+    - component: PostgreSQL compose definition
+      responsibility: Define a production-only Docker Compose service for PostgreSQL with persistent storage and predictable host-to-container connectivity.
+      interfaces:
+        - docker compose -f docker-compose.production.yml up -d
+        - DB_CONNECTION=pgsql with DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, and DB_PASSWORD in .env
+    - component: Inertia SSR production config
+      responsibility: Prevent production from targeting a missing SSR runtime while preserving the option to enable SSR later through environment variables.
+      interfaces:
+        - config('inertia.ssr.enabled')
+        - config('inertia.ssr.url')
+    - component: Fortify registration shutdown
+      responsibility: Remove registration from exposed backend features and align registered auth views with the disabled feature set.
+      interfaces:
+        - config('fortify.features')
+        - route availability for register and register.store
+    - component: Bootstrap admin seeder
+      responsibility: Seed or update the requested bootstrap admin account with a verified email and usable password.
+      interfaces:
+        - php artisan db:seed
+        - DatabaseSeeder::run()
+    - component: Hostinger deployment guide
+      responsibility: Document the exact production rollout sequence for host-managed Laravel plus Dockerized PostgreSQL.
+      interfaces:
+        - Markdown steps for provisioning, deploy, verify, and rollback
+  dependencies:
+    - component: Fortify registration shutdown
+      relationship: Supplies the route and UI behavior contract consumed by validation tests and the deployment guide.
+    - component: Bootstrap admin seeder
+      relationship: Supplies seeded credentials and seed invocation flow consumed by validation tests and the deployment guide.
+    - component: PostgreSQL compose definition
+      relationship: Supplies the database runtime contract consumed by env configuration, validation, and the deployment guide.
+    - component: Inertia SSR production config
+      relationship: Supplies production boot behavior consumed by validation tests and the deployment guide.
+  integration_points:
+    - Laravel Fortify feature registration in config/fortify.php
+    - Fortify Inertia view callbacks in app/Providers/FortifyServiceProvider.php
+    - Laravel database bootstrap path in database/seeders/DatabaseSeeder.php
+    - Inertia SSR config loading in config/inertia.php
+    - Production environment contract in .env.example
+    - Hostinger deployment instructions in docs/deployment/hostinger-vps.md
+
+contracts:
+  - from_task: T1
+    to_task: T4
+    interface: Production runtime contract for PostgreSQL connection variables and SSR-safe configuration.
+    format: docker-compose.production.yml plus env keys documented in .env.example and resolved in config/inertia.php
+  - from_task: T2
+    to_task: T4
+    interface: Registration-disabled auth surface with no reachable register routes and no active register view.
+    format: fortify feature flags plus FortifyServiceProvider view registration behavior
+  - from_task: T3
+    to_task: T4
+    interface: Idempotent bootstrap admin seed data including verified email and known credentials.
+    format: DatabaseSeeder invoking BootstrapAdminUserSeeder with User persistence assertions
+  - from_task: T1
+    to_task: T5
+    interface: Final production runtime commands, environment keys, and Docker file names.
+    format: compose command sequence and .env keys
+  - from_task: T2
+    to_task: T5
+    interface: Final auth posture for production documentation.
+    format: disabled registration behavior and route expectations
+  - from_task: T3
+    to_task: T5
+    interface: Final seed bootstrap command and first-login credentials.
+    format: seeder invocation plus admin credential note
+  - from_task: T4
+    to_task: T5
+    interface: Verified validation command list for the deployment guide's smoke-test section.
+    format: PHPUnit and Artisan command sequence
+
+tasks:
+  - id: T1
+    title: Add production PostgreSQL runtime contract
+    description: |
+      Add a production-only compose file for PostgreSQL, update the example environment to match a Hostinger VPS production posture,
+      and make Inertia SSR environment-driven so production does not point at a non-existent SSR runtime.
+      Keep this slice intentionally narrow: Docker is only for PostgreSQL, and the Laravel app continues to run on the host.
+    wave: 1
+    agent: gem-devops
+    prototype: false
+    covers: [docker-postgres, env-prod, ssr-safe]
+    priority: high
+    status: pending
+    dependencies: []
+    conflicts_with: []
+    context_files:
+      - path: /Users/raghd/Desktop/callme-wheel/.env.example
+        description: Current environment template is sqlite and local oriented.
+      - path: /Users/raghd/Desktop/callme-wheel/config/inertia.php
+        description: Current SSR config is enabled and points at 127.0.0.1:13714 without a runtime entrypoint.
+      - path: /Users/raghd/Desktop/callme-wheel/package.json
+        description: Confirms SSR build scripts exist but do not provide a deployed SSR process contract.
+    estimated_effort: medium
+    estimated_files: 3
+    estimated_lines: 120
+    focus_area: production runtime and configuration
+    verification:
+      - docker compose -f docker-compose.production.yml config
+      - php artisan config:clear && php artisan config:cache
+      - php artisan test --compact tests/Feature/Support/ProductionConfigurationTest.php
+    acceptance_criteria:
+      - docker-compose.production.yml defines a postgres service, named persistent volume, healthcheck, and restart policy without introducing app containerization.
+      - .env.example switches the documented production database contract to pgsql and includes APP_ENV, APP_DEBUG, APP_URL, and SSR-related env flags suitable for production.
+      - config/inertia.php reads environment values and defaults to a production-safe non-SSR posture when no explicit SSR runtime is configured.
+    failure_modes:
+      - scenario: Compose configuration is syntactically valid but uses hostnames or ports that do not match the documented .env contract.
+        likelihood: medium
+        impact: high
+        mitigation: Keep service naming and env keys identical between compose, .env.example, and deployment documentation.
+      - scenario: SSR remains effectively enabled after config caching and causes first-request failures in production.
+        likelihood: medium
+        impact: high
+        mitigation: Cover the resolved config values in a dedicated production configuration test and require config:cache in validation.
+    tech_stack:
+      - Docker Compose
+      - PostgreSQL 16
+      - Laravel 13 configuration
+      - Inertia Laravel 3
+    test_coverage: ProductionConfigurationTest should assert pgsql-oriented env resolution and SSR-safe config behavior.
+    environment: production
+    requires_approval: false
+    devops_security_sensitive: true
+
+  - id: T2
+    title: Disable registration and retire the register page surface
+    description: |
+      Remove Fortify registration from the active feature set, remove the explicit register view callback,
+      and delete the user-facing register page component so the app no longer presents registration as a supported flow.
+      Reuse the existing canRegister feature wiring on the home and login pages instead of adding new UI conditionals.
+    wave: 1
+    agent: gem-implementer
+    prototype: false
+    covers: [registration-disabled, register-page-removed]
+    priority: high
+    status: pending
+    dependencies: []
+    conflicts_with: []
+    context_files:
+      - path: /Users/raghd/Desktop/callme-wheel/config/fortify.php
+        description: Fortify registration is currently enabled through the features array.
+      - path: /Users/raghd/Desktop/callme-wheel/app/Providers/FortifyServiceProvider.php
+        description: Fortify currently registers an auth/register Inertia view callback.
+      - path: /Users/raghd/Desktop/callme-wheel/resources/js/pages/auth/register.tsx
+        description: Current user-facing registration page component.
+    estimated_effort: small
+    estimated_files: 3
+    estimated_lines: 90
+    focus_area: Fortify auth surface
+    verification:
+      - php artisan route:list --path=register --except-vendor
+      - php artisan test --compact tests/Feature/Auth/RegistrationDisabledTest.php
+    acceptance_criteria:
+      - config/fortify.php no longer enables Features::registration().
+      - app/Providers/FortifyServiceProvider.php no longer registers a register view callback.
+      - resources/js/pages/auth/register.tsx is removed so the user-facing register page is no longer part of the supported UI.
+    failure_modes:
+      - scenario: Removing the page component breaks an import path that is still reachable in production.
+        likelihood: medium
+        impact: medium
+        mitigation: Let tests assert the home and login pages under the new feature flags, and only keep imports that remain runtime-relevant.
+      - scenario: Fortify keeps a register route exposed because only the view callback was removed.
+        likelihood: low
+        impact: high
+        mitigation: Treat the Fortify features array as the source of truth and validate route absence directly.
+    tech_stack:
+      - Laravel Fortify 1
+      - Inertia Laravel 3
+      - React 19
+    test_coverage: RegistrationDisabledTest should cover route absence and false canRegister props on login and home.
+
+  - id: T3
+    title: Seed an idempotent bootstrap admin account
+    description: |
+      Replace the current hard-coded test user seeding with a dedicated bootstrap admin seeder,
+      wire it into DatabaseSeeder, and ensure the seeded account is immediately usable in the verified admin area.
+      The seeder should be idempotent so repeated production deploys do not create duplicates.
+    wave: 1
+    agent: gem-implementer
+    prototype: false
+    covers: [bootstrap-admin-seed]
+    priority: high
+    status: pending
+    dependencies: []
+    conflicts_with: []
+    context_files:
+      - path: /Users/raghd/Desktop/callme-wheel/database/seeders/DatabaseSeeder.php
+        description: Current seeding creates a single hard-coded test@example.com user.
+      - path: /Users/raghd/Desktop/callme-wheel/app/Models/User.php
+        description: User has no admin role field; a normal verified user is the minimal safe bootstrap path.
+      - path: /Users/raghd/Desktop/callme-wheel/routes/web.php
+        description: Admin and dashboard routes require auth and verified middleware.
+    estimated_effort: small
+    estimated_files: 2
+    estimated_lines: 70
+    focus_area: database seeding
+    verification:
+      - php artisan migrate:fresh --seed
+      - php artisan test --compact tests/Feature/Database/BootstrapAdminSeederTest.php
+    acceptance_criteria:
+      - A dedicated seeder creates or updates admin@callme.wheels with the requested password and a non-null email_verified_at value.
+      - DatabaseSeeder delegates to the dedicated bootstrap admin seeder instead of embedding the seed inline.
+      - Re-running the seeder updates the same account rather than inserting duplicates.
+    failure_modes:
+      - scenario: The seeded account exists but cannot access verified-only routes because email_verified_at is null.
+        likelihood: medium
+        impact: critical
+        mitigation: Set email_verified_at explicitly and assert it in the seeder test.
+      - scenario: Re-seeding creates duplicate admin users or rehashes unexpectedly.
+        likelihood: medium
+        impact: medium
+        mitigation: Use an idempotent upsert pattern keyed by email and assert one matching record in the test.
+    tech_stack:
+      - Laravel 13 database seeding
+      - Eloquent User model
+      - PHPUnit 12
+    test_coverage: BootstrapAdminSeederTest should assert presence, verification state, password validity, and idempotency.
+
+  - id: T4
+    title: Add narrow regression coverage for the production change set
+    description: |
+      Add focused PHPUnit coverage for the three functional risks introduced by this plan:
+      registration must stay disabled, the bootstrap admin seed must remain usable, and production config must stay pgsql and SSR safe.
+      Keep the validation surface narrow and behavior-based.
+    wave: 2
+    agent: gem-implementer
+    prototype: false
+    covers: [validation]
+    priority: high
+    status: pending
+    dependencies:
+      - T1
+      - T2
+      - T3
+    conflicts_with: []
+    context_files:
+      - path: /Users/raghd/Desktop/callme-wheel/tests/Feature/Auth/RegistrationTest.php
+        description: Existing registration tests currently assume registration is enabled and should be replaced or superseded.
+      - path: /Users/raghd/Desktop/callme-wheel/tests/Feature/Auth/AuthenticationTest.php
+        description: Existing login coverage is the closest sibling for asserting the login screen contract.
+      - path: /Users/raghd/Desktop/callme-wheel/tests/Feature/PublicWheelTest.php
+        description: Existing public landing coverage is the closest sibling for asserting home-page props.
+    estimated_effort: medium
+    estimated_files: 3
+    estimated_lines: 180
+    focus_area: targeted test coverage
+    verification:
+      - php artisan test --compact tests/Feature/Auth/RegistrationDisabledTest.php
+      - php artisan test --compact tests/Feature/Database/BootstrapAdminSeederTest.php
+      - php artisan test --compact tests/Feature/Support/ProductionConfigurationTest.php
+    acceptance_criteria:
+      - RegistrationDisabledTest proves register routes are absent and canRegister is false on the login and home responses.
+      - BootstrapAdminSeederTest proves the admin seed is verified, authenticates with the requested password, and stays idempotent.
+      - ProductionConfigurationTest proves pgsql-oriented environment values and SSR-safe config survive config caching.
+    failure_modes:
+      - scenario: Tests assert implementation details instead of the real behavioral contract and become brittle.
+        likelihood: medium
+        impact: medium
+        mitigation: Assert routes, config values, and seeded-user behavior rather than private helper methods or exact array ordering.
+      - scenario: Validation misses a production-only failure because config cache is never exercised.
+        likelihood: medium
+        impact: high
+        mitigation: Include config:cache in the validation sequence and keep the production config test environment-driven.
+    tech_stack:
+      - PHPUnit 12
+      - Laravel feature testing
+      - Inertia testing assertions
+    test_coverage: Three focused feature tests, each mapped to one production risk.
+
+  - id: T5
+    title: Write the Hostinger VPS deployment guide
+    description: |
+      Create a production deployment guide that assumes nginx and certbot are already installed on the VPS,
+      documents Dockerized PostgreSQL plus host-run Laravel, and spells out the exact bootstrap, deploy, verify, and rollback flow.
+      The guide should only reference files and commands that exist after T1 through T4 land.
+    wave: 2
+    agent: gem-documentation-writer
+    prototype: false
+    covers: [deployment-guide]
+    priority: medium
+    status: pending
+    dependencies:
+      - T1
+      - T2
+      - T3
+      - T4
+    conflicts_with: []
+    context_files:
+      - path: /Users/raghd/Desktop/callme-wheel/.env.example
+        description: Source of truth for production environment keys.
+      - path: /Users/raghd/Desktop/callme-wheel/package.json
+        description: Source of truth for frontend build commands.
+      - path: /Users/raghd/Desktop/callme-wheel/database/seeders/DatabaseSeeder.php
+        description: Source of truth for the documented seed/bootstrap step.
+    estimated_effort: small
+    estimated_files: 1
+    estimated_lines: 180
+    focus_area: production deployment documentation
+    verification:
+      - Cross-check every documented command against package.json, Artisan commands, and the created compose file.
+      - Ensure the guide includes at least one smoke-test path for login, dashboard access, and database connectivity.
+    acceptance_criteria:
+      - The markdown guide clearly states that nginx and certbot are preinstalled and out of scope.
+      - The guide covers PostgreSQL compose startup, .env population, dependency install, asset build, migrate and seed, optimize, queue or scheduler setup, and smoke checks.
+      - The guide includes a rollback or recovery section for failed deploys or broken config cache.
+    failure_modes:
+      - scenario: The guide documents commands or paths that do not exist in the repository.
+        likelihood: low
+        impact: high
+        mitigation: Depend on T4 and cross-check every command against committed files and scripts.
+    task_type: documentation
+    audience: developers
+    coverage_matrix:
+      - Hostinger prerequisites and assumptions
+      - PostgreSQL Docker lifecycle
+      - Laravel environment setup
+      - Build and migration flow
+      - Seeded admin bootstrap and first login
+      - Optimize and background process setup
+      - Smoke tests and rollback
+
+planning_pass: 1
+planning_history:
+  - pass: 1
+    reason: Initial plan creation from the user request, existing research note, and current codebase findings.
+    timestamp: 2026-05-02T00:00:00Z
+    estimated_effort: medium
+    estimated_files: 3
+    estimated_lines: 300
+    focus_area: minimal safe implementation slices
+    verification:
+      - Wave 1 tasks stay within three-file slices.
+      - Validation is explicit and behavior-scoped.
+      - Documentation depends on validated implementation outputs.
+    acceptance_criteria:
+      - The plan covers Dockerized PostgreSQL, Hostinger deployment documentation, registration shutdown, bootstrap admin seeding, and production readiness.
+      - The plan keeps the file surface minimal and avoids unrelated architecture changes.
+      - The plan defines executable validation steps for every functional slice.
+    failure_modes:
+      - scenario: The plan spreads work across unnecessary files and weakens rollout safety.
+        likelihood: medium
+        impact: medium
+        mitigation: Keep each task to the smallest safe file set and reuse existing Fortify and Inertia wiring wherever possible.

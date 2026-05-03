@@ -1,0 +1,29 @@
+{
+    "name": "CallMe Prize Wheel",
+    "short_name": "Prize Wheel",
+    "description": "In-store prize wheel for CallMe retail locations.",
+    "start_url": "/wheel",
+    "scope": "/",
+    "display": "fullscreen",
+    "display_override": ["fullscreen", "standalone"],
+    "orientation": "landscape",
+    "background_color": "#0a0a0a",
+    "theme_color": "#0a0a0a",
+    "lang": "en",
+    "categories": ["business", "entertainment"],
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}

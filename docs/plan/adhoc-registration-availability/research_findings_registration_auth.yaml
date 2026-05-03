@@ -1,0 +1,290 @@
+plan_id: adhoc-registration-availability
+objective: Research the minimal code paths that control user registration availability and UI exposure.
+focus_area: registration_auth
+created_at: '2026-05-02T00:00:00Z'
+created_by: GitHub Copilot
+status: completed
+
+tldr: |
+  - Backend registration is currently enabled because config/fortify.php includes Features::registration(), and Fortify runtime routes register GET /register and POST /register.
+  - Frontend exposure is gated in two places by a canRegister prop: the public welcome page and the login page.
+  - The dedicated register page exists as resources/js/pages/auth/register.tsx and is bound by FortifyServiceProvider::registerView(); the smallest edit points are config/fortify.php, app/Providers/FortifyServiceProvider.php, routes/web.php, resources/js/pages/welcome.tsx, and resources/js/pages/auth/login.tsx.
+
+research_metadata:
+  methodology: Hybrid retrieval via grep_search and semantic_search, targeted file reads, Context7 Fortify/Laravel docs lookup, and runtime verification with php artisan route:list.
+  scope: Narrow auth-registration path only, covering Fortify config, Fortify view bindings, public route defaults, and frontend auth entry points.
+  confidence: high
+  coverage: 95
+  decision_blockers: 0
+  research_blockers: 0
+
+files_analyzed:
+  - file: config/fortify.php
+    path: /Users/raghd/Desktop/callme-wheel/config/fortify.php
+    purpose: Declares Fortify feature flags and whether view routes are enabled.
+    key_elements:
+      - element: views
+        type: variable
+        location: config/fortify.php:133
+        description: View-returning Fortify routes are enabled with 'views' => true.
+      - element: features
+        type: pattern
+        location: config/fortify.php:146
+        description: Features::registration() is present, which keeps Fortify registration enabled.
+    language: php
+    lines: 157
+  - file: FortifyServiceProvider.php
+    path: /Users/raghd/Desktop/callme-wheel/app/Providers/FortifyServiceProvider.php
+    purpose: Binds Fortify auth views and injects auth-related props into Inertia pages.
+    key_elements:
+      - element: Fortify::loginView
+        type: function
+        location: app/Providers/FortifyServiceProvider.php:50
+        description: Injects canRegister into the login page using Features::enabled(Features::registration()).
+      - element: Fortify::registerView
+        type: function
+        location: app/Providers/FortifyServiceProvider.php:69
+        description: Maps the Fortify register view route to the auth/register Inertia page.
+      - element: Fortify::createUsersUsing
+        type: function
+        location: app/Providers/FortifyServiceProvider.php:42
+        description: Points registration submissions at App\Actions\Fortify\CreateNewUser.
+    language: php
+    lines: 91
+  - file: routes/web.php
+    path: /Users/raghd/Desktop/callme-wheel/routes/web.php
+    purpose: Defines the public home route and passes canRegister into the landing page response.
+    key_elements:
+      - element: home route defaults
+        type: pattern
+        location: routes/web.php:10
+        description: Sets canRegister on the home route from Features::enabled(Features::registration()).
+    language: php
+    lines: 27
+  - file: welcome.tsx
+    path: /Users/raghd/Desktop/callme-wheel/resources/js/pages/welcome.tsx
+    purpose: Public landing page that conditionally shows a register CTA for guests.
+    key_elements:
+      - element: canRegister prop
+        type: variable
+        location: resources/js/pages/welcome.tsx:21
+        description: Receives the backend-provided registration availability flag.
+      - element: register link gate
+        type: pattern
+        location: resources/js/pages/welcome.tsx:100
+        description: Only renders the register link when canRegister is truthy.
+    language: typescript
+    lines: 164
+  - file: login.tsx
+    path: /Users/raghd/Desktop/callme-wheel/resources/js/pages/auth/login.tsx
+    purpose: Login page that conditionally shows the create-account link.
+    key_elements:
+      - element: canRegister prop
+        type: variable
+        location: resources/js/pages/auth/login.tsx:17
+        description: Receives registration availability from FortifyServiceProvider.
+      - element: register link gate
+        type: pattern
+        location: resources/js/pages/auth/login.tsx:97
+        description: Only renders the create-account link when canRegister is true.
+    language: typescript
+    lines: 121
+  - file: register.tsx
+    path: /Users/raghd/Desktop/callme-wheel/resources/js/pages/auth/register.tsx
+    purpose: Dedicated registration page and form.
+    key_elements:
+      - element: Register component
+        type: function
+        location: resources/js/pages/auth/register.tsx:12
+        description: Renders the registration UI.
+      - element: store.form()
+        type: function
+        location: resources/js/pages/auth/register.tsx:17
+        description: Submits to the generated POST /register route helper.
+    language: typescript
+    lines: 115
+  - file: routes helper
+    path: /Users/raghd/Desktop/callme-wheel/resources/js/routes/index.ts
+    purpose: Generated Wayfinder helper for GET /register.
+    key_elements:
+      - element: register
+        type: function
+        location: resources/js/routes/index.ts:144
+        description: Generates the GET /register URL used by welcome and login pages.
+    language: typescript
+    lines: 218
+  - file: register route helper
+    path: /Users/raghd/Desktop/callme-wheel/resources/js/routes/register/index.ts
+    purpose: Generated Wayfinder helper for POST /register.
+    key_elements:
+      - element: store
+        type: function
+        location: resources/js/routes/register/index.ts:7
+        description: Generates the POST /register endpoint used by the register form.
+    language: typescript
+    lines: 62
+
+patterns_found:
+  - category: architecture
+    pattern: Fortify feature flag drives both backend route registration and UI booleans.
+    description: The same Features::enabled(Features::registration()) check is used to decide whether registration links are exposed in Inertia props.
+    examples:
+      - file: /Users/raghd/Desktop/callme-wheel/config/fortify.php
+        location: config/fortify.php:147
+        snippet: Features::registration()
+      - file: /Users/raghd/Desktop/callme-wheel/app/Providers/FortifyServiceProvider.php
+        location: app/Providers/FortifyServiceProvider.php:52
+        snippet: 'canRegister' => Features::enabled(Features::registration())
+      - file: /Users/raghd/Desktop/callme-wheel/routes/web.php
+        location: routes/web.php:11
+        snippet: ->defaults('canRegister', Features::enabled(Features::registration()))
+    prevalence: common
+  - category: structure
+    pattern: Frontend register links use generated route helpers, not hardcoded URLs.
+    description: Guest-facing links call register() from the generated routes module, while form submission uses store.form() from the register routes helper.
+    examples:
+      - file: /Users/raghd/Desktop/callme-wheel/resources/js/pages/welcome.tsx
+        location: resources/js/pages/welcome.tsx:102
+        snippet: href={register()}
+      - file: /Users/raghd/Desktop/callme-wheel/resources/js/pages/auth/login.tsx
+        location: resources/js/pages/auth/login.tsx:100
+        snippet: <TextLink href={register()} tabIndex={5}>
+      - file: /Users/raghd/Desktop/callme-wheel/resources/js/pages/auth/register.tsx
+        location: resources/js/pages/auth/register.tsx:17
+        snippet: {...store.form()}
+    prevalence: common
+  - category: naming
+    pattern: Registration availability is exposed to the frontend as canRegister.
+    description: Both the public landing page and login page consume the same prop name for link gating.
+    examples:
+      - file: /Users/raghd/Desktop/callme-wheel/resources/js/pages/welcome.tsx
+        location: resources/js/pages/welcome.tsx:21
+        snippet: canRegister?: boolean;
+      - file: /Users/raghd/Desktop/callme-wheel/resources/js/pages/auth/login.tsx
+        location: resources/js/pages/auth/login.tsx:17
+        snippet: canRegister: boolean;
+    prevalence: common
+
+related_architecture:
+  components_relevant_to_domain:
+    - component: Fortify feature configuration
+      responsibility: Enables or disables registration at the auth backend layer.
+      location: /Users/raghd/Desktop/callme-wheel/config/fortify.php
+      relationship_to_domain: domain depends on this
+    - component: FortifyServiceProvider
+      responsibility: Binds Inertia auth pages and passes registration availability into login UI.
+      location: /Users/raghd/Desktop/callme-wheel/app/Providers/FortifyServiceProvider.php
+      relationship_to_domain: domain depends on this
+    - component: Public home route
+      responsibility: Passes registration availability into the welcome page.
+      location: /Users/raghd/Desktop/callme-wheel/routes/web.php
+      relationship_to_domain: domain depends on this
+    - component: Welcome page
+      responsibility: Surfaces guest registration CTA on the landing page.
+      location: /Users/raghd/Desktop/callme-wheel/resources/js/pages/welcome.tsx
+      relationship_to_domain: this uses domain outputs
+    - component: Login page
+      responsibility: Surfaces guest registration CTA from the login screen.
+      location: /Users/raghd/Desktop/callme-wheel/resources/js/pages/auth/login.tsx
+      relationship_to_domain: this uses domain outputs
+    - component: Register page
+      responsibility: Renders the registration form for GET /register and submits POST /register.
+      location: /Users/raghd/Desktop/callme-wheel/resources/js/pages/auth/register.tsx
+      relationship_to_domain: this uses domain outputs
+  interfaces_used_by_domain:
+    - interface: Laravel\Fortify\Features
+      location: /Users/raghd/Desktop/callme-wheel/config/fortify.php
+      usage_pattern: Used to enable registration and to compute canRegister booleans.
+    - interface: Laravel\Fortify\Fortify
+      location: /Users/raghd/Desktop/callme-wheel/app/Providers/FortifyServiceProvider.php
+      usage_pattern: Used to bind login and registration Inertia views.
+  data_flow_involving_domain: config/fortify.php enables registration; Fortify registers GET/POST /register; routes/web.php and FortifyServiceProvider.php compute canRegister from the same Fortify feature flag; Inertia pages use canRegister to show or hide guest-facing create-account links; the register page submits to POST /register via generated Wayfinder helpers.
+  key_relationships_to_domain:
+    - from: /Users/raghd/Desktop/callme-wheel/config/fortify.php
+      to: /Users/raghd/Desktop/callme-wheel/app/Providers/FortifyServiceProvider.php
+      relationship: configures
+    - from: /Users/raghd/Desktop/callme-wheel/config/fortify.php
+      to: vendor Fortify register routes
+      relationship: enables
+    - from: /Users/raghd/Desktop/callme-wheel/routes/web.php
+      to: /Users/raghd/Desktop/callme-wheel/resources/js/pages/welcome.tsx
+      relationship: passes props to
+    - from: /Users/raghd/Desktop/callme-wheel/app/Providers/FortifyServiceProvider.php
+      to: /Users/raghd/Desktop/callme-wheel/resources/js/pages/auth/login.tsx
+      relationship: passes props to
+    - from: /Users/raghd/Desktop/callme-wheel/app/Providers/FortifyServiceProvider.php
+      to: /Users/raghd/Desktop/callme-wheel/resources/js/pages/auth/register.tsx
+      relationship: maps route to page
+
+related_technology_stack:
+  languages_used_in_domain:
+    - PHP
+    - TypeScript
+  frameworks_used_in_domain:
+    - name: Laravel 13
+      usage_in_domain: Provides routing, service providers, and configuration for auth.
+    - name: Laravel Fortify 1.x
+      usage_in_domain: Registers registration routes/controllers and feature gates.
+    - name: Inertia.js v3
+      usage_in_domain: Renders login/register/welcome pages from backend route callbacks.
+  libraries_used_in_domain:
+    - name: Wayfinder-generated route helpers
+      purpose_in_domain: Frontend uses generated register and register.store helpers instead of literal URLs.
+  external_apis_used_in_domain: []
+
+related_conventions:
+  naming_patterns_in_domain: Registration availability is consistently named canRegister on frontend-facing props.
+  structure_of_domain: Backend auth configuration is centralized in config/fortify.php and app/Providers/FortifyServiceProvider.php; frontend auth pages live under resources/js/pages/auth.
+  error_handling_in_domain: Registration and login forms rely on Inertia Form error bags rendered through InputError components.
+  testing_in_domain: No registration-specific tests were examined in this narrow pass.
+  documentation_in_domain: No project-local auth documentation files were found in the requested scope.
+
+related_dependencies:
+  internal:
+    - component: /Users/raghd/Desktop/callme-wheel/app/Actions/Fortify/CreateNewUser.php
+      relationship_to_domain: Handles POST /register user creation after Fortify route dispatch.
+      direction: outbound
+    - component: /Users/raghd/Desktop/callme-wheel/resources/js/routes/index.ts
+      relationship_to_domain: Supplies GET /register helper to UI links.
+      direction: outbound
+    - component: /Users/raghd/Desktop/callme-wheel/resources/js/routes/register/index.ts
+      relationship_to_domain: Supplies POST /register helper to the registration form.
+      direction: outbound
+  external:
+    - name: laravel/fortify
+      purpose_for_domain: Provides registration feature flags, controllers, and routes.
+    - name: inertiajs/inertia-laravel
+      purpose_for_domain: Connects Fortify view callbacks to frontend pages.
+
+domain_security_considerations:
+  sensitive_areas:
+    - area: Registration feature toggle
+      location: /Users/raghd/Desktop/callme-wheel/config/fortify.php
+      concern: Removing Features::registration() disables new account creation.
+    - area: Registration form endpoint
+      location: /Users/raghd/Desktop/callme-wheel/resources/js/pages/auth/register.tsx
+      concern: Form posts directly to POST /register through Fortify.
+  authentication_patterns_in_domain: Session-based Fortify auth with vendor-managed registration and login endpoints.
+  authorization_patterns_in_domain: Guest access is implied for Fortify registration routes; authenticated routes are separate under auth and verified middleware.
+  data_validation_in_domain: Registration submissions are validated by App\Actions\Fortify\CreateNewUser via Fortify::createUsersUsing.
+
+testing_patterns:
+  framework: PHPUnit
+  coverage_areas:
+    - Runtime route presence was verified with php artisan route:list.
+  test_organization: Tests directory exists under tests/Feature and tests/Unit, but no registration-focused test file was read in this pass.
+  mock_patterns: []
+
+open_questions:
+  - question: Should registration be disabled at the backend only, or also hidden explicitly from the register page route and generated route helpers?
+    context: The current code already hides guest CTAs when canRegister is false, but the page component and generated route helpers still exist in the codebase even if Fortify disables the runtime route.
+    type: nice_to_know
+    affects:
+      - adhoc-registration-availability
+
+gaps:
+  - area: Registration-specific automated tests
+    description: This pass did not inspect or locate a focused feature test asserting registration route availability or UI hiding behavior.
+    impact: nice_to_know
+    affects:
+      - adhoc-registration-availability

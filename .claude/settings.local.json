@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan *)",
+      "Bash(php -v)",
+      "Bash(PGPASSWORD='Rag123456@@' psql -U raghd -h 127.0.0.1 -d callme-wheel -c \"\\\\dt\")",
+      "Bash(vendor/bin/pint --dirty --format agent)",
+      "Bash(npm run *)",
+      "Bash(vendor/bin/pint --format agent)"
+    ]
+  }
+}

@@ -1,0 +1,341 @@
+plan_id: adhoc-prod-admin-seed-20260502
+objective: Determine the current user seeding and admin-related model setup, and identify the smallest safe file surface to seed a production admin user with email admin@callme.wheels without changing code in this research task.
+focus_area: database-auth-seeding
+created_at: 2026-05-02T00:00:00Z
+created_by: GitHub Copilot
+status: completed
+
+tldr: |
+	- Database seeding currently creates exactly one hard-coded user in DatabaseSeeder: Test User <test@example.com>.
+	- The User model has no admin flag, role relation, policy, or permissions package integration; "admin" in this codebase is a route/UI namespace for authenticated wheel owners, not a privileged account type.
+	- The smallest current-codebase path for admin@callme.wheels is seeding a normal User record, not introducing role semantics.
+	- The minimum file surface implied by the existing implementation is DatabaseSeeder plus one dedicated seeder file under database/seeders; UserFactory and User.php do not need changes unless explicit admin semantics are introduced.
+	- If "admin" must mean elevated authorization, that is a separate schema and authorization change because no current model field or relationship can represent it.
+
+research_metadata:
+	methodology: Hybrid retrieval using targeted read_file on the named seeding and auth files, grep_search for admin and role concepts, semantic discovery via route and test inspection, and Context7 Laravel 13 docs lookup for seeding behavior.
+	scope: Narrow backend/auth scope covering seeders, user factory, user model, user schema, Fortify user creation, admin routes, and admin-area tests.
+	confidence: high
+	coverage: 92
+	decision_blockers: 1
+	research_blockers: 0
+
+files_analyzed:
+	- file: DatabaseSeeder.php
+		path: database/seeders/DatabaseSeeder.php
+		purpose: Default application seeder executed by php artisan db:seed.
+		key_elements:
+			- element: DatabaseSeeder::run
+				type: function
+				location: database/seeders/DatabaseSeeder.php:13
+				description: Creates a single hard-coded user with name Test User and email test@example.com.
+		language: PHP
+		lines: 20
+	- file: UserFactory.php
+		path: database/factories/UserFactory.php
+		purpose: Test and local factory defaults for User model instances.
+		key_elements:
+			- element: UserFactory::definition
+				type: function
+				location: database/factories/UserFactory.php:21
+				description: Produces verified users with a cached hashed password derived from the literal string password.
+			- element: UserFactory::withTwoFactor
+				type: function
+				location: database/factories/UserFactory.php:41
+				description: Adds encrypted two-factor fields for tests.
+		language: PHP
+		lines: 49
+	- file: User.php
+		path: app/Models/User.php
+		purpose: Authenticated user model used by Fortify and application ownership relationships.
+		key_elements:
+			- element: Fillable attribute
+				type: pattern
+				location: app/Models/User.php:14
+				description: Only name, email, and password are mass assignable.
+			- element: TwoFactorAuthenticatable trait
+				type: pattern
+				location: app/Models/User.php:18
+				description: Enables Fortify two-factor support on the User model.
+			- element: User::wheels
+				type: function
+				location: app/Models/User.php:31
+				description: Defines ownership of wheels; this is the main app-level relationship used by the admin namespace.
+		language: PHP
+		lines: 35
+	- file: 0001_01_01_000000_create_users_table.php
+		path: database/migrations/0001_01_01_000000_create_users_table.php
+		purpose: Base users schema.
+		key_elements:
+			- element: users table definition
+				type: pattern
+				location: database/migrations/0001_01_01_000000_create_users_table.php:14
+				description: Users table contains id, name, email, email_verified_at, password, remember_token, and timestamps only.
+		language: PHP
+		lines: 42
+	- file: 2025_08_14_170933_add_two_factor_columns_to_users_table.php
+		path: database/migrations/2025_08_14_170933_add_two_factor_columns_to_users_table.php
+		purpose: Adds Fortify two-factor columns to users table.
+		key_elements:
+			- element: users two-factor columns
+				type: pattern
+				location: database/migrations/2025_08_14_170933_add_two_factor_columns_to_users_table.php:14
+				description: Adds two_factor_secret, two_factor_recovery_codes, and two_factor_confirmed_at.
+		language: PHP
+		lines: 31
+	- file: CreateNewUser.php
+		path: app/Actions/Fortify/CreateNewUser.php
+		purpose: Defines Fortify registration persistence path.
+		key_elements:
+			- element: CreateNewUser::create
+				type: function
+				location: app/Actions/Fortify/CreateNewUser.php:19
+				description: Persists only name, email, and password when users register.
+		language: PHP
+		lines: 31
+	- file: fortify.php
+		path: config/fortify.php
+		purpose: Fortify feature and registration configuration.
+		key_elements:
+			- element: username/email config
+				type: pattern
+				location: config/fortify.php:41
+				description: Email is the username field.
+			- element: features array
+				type: pattern
+				location: config/fortify.php:119
+				description: Registration, password reset, email verification, and two-factor authentication are enabled.
+		language: PHP
+		lines: 129
+	- file: web.php
+		path: routes/web.php
+		purpose: Defines public and authenticated app routes.
+		key_elements:
+			- element: auth+verified admin group
+				type: pattern
+				location: routes/web.php:15
+				description: Dashboard and admin routes require auth and verified middleware.
+			- element: admin.wheels resource routes
+				type: pattern
+				location: routes/web.php:19
+				description: The admin namespace is a route prefix under authenticated access, not a role declaration.
+		language: PHP
+		lines: 24
+	- file: WheelController.php
+		path: app/Http/Controllers/Admin/WheelController.php
+		purpose: Handles the admin-prefixed wheel management area.
+		key_elements:
+			- element: WheelController::index
+				type: function
+				location: app/Http/Controllers/Admin/WheelController.php:17
+				description: Lists only the authenticated user's wheels via request->user()->wheels().
+			- element: WheelController::authorizeOwner
+				type: function
+				location: app/Http/Controllers/Admin/WheelController.php:262
+				description: Enforces ownership by comparing wheel.user_id to the authenticated user id and aborting with 403.
+		language: PHP
+		lines: 280
+	- file: WheelControllerTest.php
+		path: tests/Feature/Admin/WheelControllerTest.php
+		purpose: Defines expected access for the admin-prefixed wheel area.
+		key_elements:
+			- element: test_guests_cannot_access_admin_wheels
+				type: function
+				location: tests/Feature/Admin/WheelControllerTest.php:14
+				description: Guests are redirected to login.
+			- element: test_authenticated_user_sees_only_their_wheels
+				type: function
+				location: tests/Feature/Admin/WheelControllerTest.php:19
+				description: Authenticated users access only their own records.
+			- element: test_user_cannot_edit_another_users_wheel
+				type: function
+				location: tests/Feature/Admin/WheelControllerTest.php:107
+				description: Access control is ownership-based, not role-based.
+		language: PHP
+		lines: 224
+
+patterns_found:
+	- category: structure
+		pattern: Single default seeder with hard-coded user record
+		description: The app currently seeds one explicit user directly in DatabaseSeeder instead of delegating to multiple seeders or environment-specific seeders.
+		examples:
+			- file: database/seeders/DatabaseSeeder.php
+				location: database/seeders/DatabaseSeeder.php:15
+				snippet: User::factory()->create(['name' => 'Test User', 'email' => 'test@example.com']);
+		prevalence: common
+	- category: naming
+		pattern: Admin namespace denotes an authenticated management area
+		description: Admin naming is used for route prefixes, tests, frontend pages, and controllers, but the enforcement model is authenticated ownership rather than elevated user role.
+		examples:
+			- file: routes/web.php
+				location: routes/web.php:18
+				snippet: Route::prefix('admin')->name('admin.')->group(function () {
+			- file: app/Http/Controllers/Admin/WheelController.php
+				location: app/Http/Controllers/Admin/WheelController.php:19
+				snippet: $request->user()->wheels()
+			- file: tests/Feature/Admin/WheelControllerTest.php
+				location: tests/Feature/Admin/WheelControllerTest.php:19
+				snippet: public function test_authenticated_user_sees_only_their_wheels(): void
+		prevalence: common
+	- category: architecture
+		pattern: Ownership-based authorization without policies
+		description: Resource access checks are implemented inline by comparing the authenticated user id to the owning foreign key.
+		examples:
+			- file: app/Http/Controllers/Admin/WheelController.php
+				location: app/Http/Controllers/Admin/WheelController.php:262
+				snippet: abort_unless($wheel->user_id === $request->user()?->id, 403);
+		prevalence: occasional
+	- category: security
+		pattern: Production-relevant user credentials are not modeled separately from generic users
+		description: The only persisted user attributes are identity, password, email verification, remember token, and Fortify two-factor data.
+		examples:
+			- file: app/Models/User.php
+				location: app/Models/User.php:14
+				snippet: #[Fillable(['name', 'email', 'password'])]
+			- file: database/migrations/0001_01_01_000000_create_users_table.php
+				location: database/migrations/0001_01_01_000000_create_users_table.php:14
+				snippet: $table->string('email')->unique();
+		prevalence: common
+	- category: testing
+		pattern: Factories are used for authenticated-user tests with no admin specialization
+		description: Tests create generic users via User::factory()->create() and exercise access via actingAs.
+		examples:
+			- file: tests/Feature/Admin/WheelControllerTest.php
+				location: tests/Feature/Admin/WheelControllerTest.php:21
+				snippet: $alice = User::factory()->create();
+			- file: tests/Feature/DashboardTest.php
+				location: tests/Feature/DashboardTest.php:20
+				snippet: $user = User::factory()->create();
+		prevalence: common
+
+related_architecture:
+	components_relevant_to_domain:
+		- component: DatabaseSeeder
+			responsibility: Entry point for database seeding.
+			location: database/seeders/DatabaseSeeder.php
+			relationship_to_domain: domain depends on this
+		- component: UserFactory
+			responsibility: Creates persisted user records for tests and seed overrides.
+			location: database/factories/UserFactory.php
+			relationship_to_domain: domain depends on this
+		- component: User model
+			responsibility: Stores auth identity and wheel ownership.
+			location: app/Models/User.php
+			relationship_to_domain: domain depends on this
+		- component: Fortify CreateNewUser action
+			responsibility: Registration persistence path for new users.
+			location: app/Actions/Fortify/CreateNewUser.php
+			relationship_to_domain: this uses domain outputs
+		- component: Admin WheelController
+			responsibility: Authenticated wheel management.
+			location: app/Http/Controllers/Admin/WheelController.php
+			relationship_to_domain: this uses domain outputs
+	interfaces_used_by_domain:
+		- interface: Laravel\Fortify\Contracts\CreatesNewUsers
+			location: app/Actions/Fortify/CreateNewUser.php
+			usage_pattern: Fortify delegates user registration persistence through this contract implementation.
+	data_flow_involving_domain: DatabaseSeeder or factories create User records in the users table; Fortify registration also creates User records with the same limited attribute set; authenticated routes then use the User->wheels relationship and ownership checks for the admin-prefixed area.
+	key_relationships_to_domain:
+		- from: DatabaseSeeder
+			to: UserFactory
+			relationship: calls
+		- from: User
+			to: Wheel
+			relationship: hasMany
+		- from: Admin WheelController
+			to: User
+			relationship: calls
+		- from: CreateNewUser
+			to: User
+			relationship: calls
+
+related_technology_stack:
+	languages_used_in_domain:
+		- PHP
+	frameworks_used_in_domain:
+		- name: Laravel 13
+			usage_in_domain: Eloquent model persistence, migrations, seeders, route middleware, and controller flow.
+		- name: Laravel Fortify
+			usage_in_domain: Registration and two-factor support for User model authentication.
+	libraries_used_in_domain:
+		- name: fakerphp/faker
+			purpose_in_domain: Generates factory defaults for test users.
+	external_apis_used_in_domain: []
+
+related_conventions:
+	naming_patterns_in_domain: Generic authenticated users are modeled as User; admin naming is used for route/controller/page organization rather than for a separate model concept.
+	structure_of_domain: Seeders live in database/seeders, factories in database/factories, schema in database/migrations, and auth persistence in app/Actions/Fortify.
+	error_handling_in_domain: Ownership violations use abort_unless(..., 403) inside the controller rather than policies or custom exceptions.
+	testing_in_domain: Feature tests use RefreshDatabase, User::factory()->create(), and actingAs for authenticated flows.
+	documentation_in_domain: No repository documentation describing admin-user provisioning or production seeding was found in the analyzed scope.
+
+related_dependencies:
+	internal:
+		- component: database/seeders/DatabaseSeeder.php
+			relationship_to_domain: seeds users directly
+			direction: outbound
+		- component: database/factories/UserFactory.php
+			relationship_to_domain: supplies seeded and test user attributes
+			direction: outbound
+		- component: app/Actions/Fortify/CreateNewUser.php
+			relationship_to_domain: creates the same user shape used elsewhere
+			direction: bidirectional
+		- component: app/Http/Controllers/Admin/WheelController.php
+			relationship_to_domain: consumes authenticated user ownership
+			direction: inbound
+	external:
+		- name: laravel/framework
+			purpose_for_domain: Provides Eloquent models, seeders, migrations, routing, and authentication scaffolding.
+		- name: laravel/fortify
+			purpose_for_domain: Provides registration and two-factor authentication behavior around the User model.
+
+domain_security_considerations:
+	sensitive_areas:
+		- area: Hard-coded seeded account
+			location: database/seeders/DatabaseSeeder.php
+			concern: The default seeder unconditionally creates a known user identity; current code does not distinguish local/demo/test provisioning from production provisioning.
+		- area: Factory password default
+			location: database/factories/UserFactory.php
+			concern: The factory reuses a hash derived from the literal password string password for convenience in tests and seeded overrides.
+		- area: Admin access semantics
+			location: routes/web.php
+			concern: The admin-prefixed area is protected by auth and verified middleware but not by any role or permission concept.
+	authentication_patterns_in_domain: Session-based web authentication via Fortify with email as username and optional two-factor support.
+	authorization_patterns_in_domain: Verified authenticated users may enter the admin-prefixed area; specific wheel mutations are restricted by ownership checks, not by roles.
+	data_validation_in_domain: Fortify registration validates profile and password fields before creating users; seeded users bypass request validation and rely on model persistence constraints.
+
+testing_patterns:
+	framework: PHPUnit with Laravel feature testing
+	coverage_areas:
+		- authenticated dashboard access
+		- guest redirects to login
+		- ownership checks in admin-prefixed wheel management
+		- Fortify authentication and verification flows
+	test_organization: tests/Feature/Auth, tests/Feature/Admin, and tests/Feature/DashboardTest.php
+	mock_patterns:
+		- Storage::fake('public') for file upload behavior
+		- actingAs($user) for authenticated access
+
+open_questions:
+	- question: Should admin@callme.wheels only be a bootstrap account, or should it represent a distinct privileged role?
+		context: The codebase currently has no field, relation, or policy layer that can represent elevated admin semantics.
+		type: decision_blocker
+		affects:
+			- adhoc-prod-admin-seed-20260502
+	- question: How should the initial production admin password be supplied or rotated?
+		context: Current seeding and factory patterns can create users, but the repository does not define a production credential-provisioning convention.
+		type: research
+		affects:
+			- adhoc-prod-admin-seed-20260502
+
+gaps:
+	- area: Admin role representation
+		description: No admin flag, roles table, permissions package, policies directory, or role-specific tests were found in the analyzed workspace.
+		impact: decision_blocker
+		affects:
+			- adhoc-prod-admin-seed-20260502
+	- area: Production seeding convention
+		description: No existing dedicated production seeder or documented environment guard for database seeding was found; only the default hard-coded test user seeder exists.
+		impact: research_blocker
+		affects:
+			- adhoc-prod-admin-seed-20260502
