@@ -192,6 +192,41 @@ class WheelControllerTest extends TestCase
         $this->assertSame('lights', $wheel->peg_style);
     }
 
+    public function test_user_can_create_wheel_with_new_realistic_pointer_style(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post(route('admin.wheels.store'), [
+            'name' => 'Realistic Marker Wheel',
+            'theme' => 'dark',
+            'pointer_style' => 'needle',
+            'items' => [
+                ['label' => 'A', 'weight' => 1],
+                ['label' => 'B', 'weight' => 1],
+            ],
+        ])->assertSessionHasNoErrors();
+
+        $wheel = Wheel::query()->where('name', 'Realistic Marker Wheel')->firstOrFail();
+        $this->assertSame('needle', $wheel->pointer_style);
+    }
+
+    public function test_user_can_create_wheel_with_royal_theme(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post(route('admin.wheels.store'), [
+            'name' => 'Royal Theme Wheel',
+            'theme' => 'royal',
+            'items' => [
+                ['label' => 'A', 'weight' => 1],
+                ['label' => 'B', 'weight' => 1],
+            ],
+        ])->assertSessionHasNoErrors();
+
+        $wheel = Wheel::query()->where('name', 'Royal Theme Wheel')->firstOrFail();
+        $this->assertSame('royal', $wheel->theme);
+    }
+
     public function test_invalid_style_values_are_rejected(): void
     {
         $user = User::factory()->create();

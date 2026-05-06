@@ -25,7 +25,7 @@ trait WheelValidationRules
             'address' => ['nullable', 'string', 'max:255'],
             'theme' => [
                 'required',
-                Rule::in(['dark', 'casino', 'pastel', 'neon', 'gold', 'ocean', 'sunset', 'midnight', 'retro', 'brand', 'custom']),
+                Rule::in(['dark', 'casino', 'pastel', 'neon', 'royal', 'gold', 'ocean', 'sunset', 'midnight', 'retro', 'brand', 'custom']),
             ],
             'brand_color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'custom_palette' => ['nullable', 'array'],
@@ -38,7 +38,7 @@ trait WheelValidationRules
             'custom_palette.sliceColors' => ['nullable', 'array', 'max:8'],
             'custom_palette.sliceColors.*' => ['string', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'hub_style' => ['nullable', Rule::in(['classic', 'minimal', 'logo', 'starburst'])],
-            'pointer_style' => ['nullable', Rule::in(['classic', 'arrow', 'flag', 'triangle', 'pin', 'ball', 'diamond'])],
+            'pointer_style' => ['nullable', Rule::in(['classic', 'arrow', 'flag', 'triangle', 'pin', 'ball', 'diamond', 'needle', 'spear', 'crown'])],
             'peg_style' => ['nullable', Rule::in(['dots', 'lights', 'none'])],
             'number_of_fields' => ['nullable', 'integer', 'min:2', 'max:24'],
             'sound_enabled' => ['boolean'],

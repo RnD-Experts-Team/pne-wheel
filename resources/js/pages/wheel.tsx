@@ -10,7 +10,6 @@ import PrizeWheel, {
 } from '@/components/prize-wheel';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import WheelPublicLayout from '@/layouts/wheel/wheel-public-layout';
 import { resolveTheme, type CustomPalette, type WheelThemeKey } from '@/lib/wheel-themes';
 
 type PublicWheel = {
@@ -78,73 +77,13 @@ export default function WheelPage({ wheel, spinEndpoint }: Props) {
         [wheel.confetti_enabled],
     );
 
-    const brandPanel = (
-        <div className="flex h-full flex-col items-center justify-center gap-8 text-center">
-            {wheel.brand_logo_url ? (
-                <img
-                    src={wheel.brand_logo_url}
-                    alt={`شعار ${wheel.brand_name}`}
-                    className="h-24 w-auto max-w-[60%] object-contain"
-                />
-            ) : (
-                <p
-                    className="text-xs font-semibold tracking-[0.4em] uppercase"
-                    style={{ color: theme.mutedText }}
-                >
-                    {wheel.brand_name}
-                </p>
-            )}
-
-            <div className="space-y-2">
-                <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                    {wheel.brand_name}
-                </h1>
-                {wheel.address && (
-                    <p className="text-sm sm:text-base" style={{ color: theme.mutedText }}>
-                        {wheel.address}
-                    </p>
-                )}
-            </div>
-
-            <div
-                className="rounded-xl px-5 py-4 text-sm leading-relaxed"
-                style={{ background: theme.panel, color: theme.mutedText }}
-            >
-                اضغط على العجلة — أو الزر تحتها — للفوز.
-                {wheel.confetti_enabled && ' وعند الفوز ستحصل على انفجار من الكونفيتي.'}
-            </div>
-
-            <div className="flex w-full items-center justify-center gap-3">
-                {wheel.sound_enabled && (
-                    <button
-                        type="button"
-                        onClick={() => setMuted((m) => !m)}
-                        className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
-                        style={{
-                            background: theme.panel,
-                            color: theme.mutedText,
-                        }}
-                        aria-pressed={muted}
-                    >
-                        {muted ? <VolumeX className="size-3.5" /> : <Volume2 className="size-3.5" />}
-                        {muted ? 'الصوت مغلق' : 'الصوت مفعّل'}
-                    </button>
-                )}
-            </div>
-
-            <span
-                className="text-[10px] tracking-[0.3em] uppercase"
-                style={{ color: theme.mutedText }}
-            >
-                CallMe Wheel
-            </span>
-        </div>
-    );
-
     return (
         <>
             <Head title={wheel.brand_name || wheel.name} />
-            <WheelPublicLayout theme={theme} brand={brandPanel}>
+            <div
+                className="relative min-h-svh w-full flex flex-col items-center justify-center overflow-hidden p-4 sm:p-8"
+                style={{ background: theme.background, color: theme.text }}
+            >
                 <PrizeWheel
                     items={wheel.items}
                     numberOfFields={wheel.number_of_fields}
@@ -158,12 +97,14 @@ export default function WheelPage({ wheel, spinEndpoint }: Props) {
                         spin: 'اضغط للدوران',
                         spinning: 'جارٍ الدوران…',
                         spinAgain: 'ادر مرة أخرى',
-                        hubText: 'إدارة',
+                        hubText: 'ادِر',
                     }}
                     resolveWinner={resolveWinner}
                     onSpinComplete={onSpinComplete}
                 />
-            </WheelPublicLayout>
+
+             
+            </div>
 
             {wheel.confetti_enabled && (
                 <ConfettiBurst
@@ -230,3 +171,5 @@ export default function WheelPage({ wheel, spinEndpoint }: Props) {
         </>
     );
 }
+
+WheelPage.layout = null;

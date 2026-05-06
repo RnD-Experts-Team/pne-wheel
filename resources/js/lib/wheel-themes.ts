@@ -3,6 +3,7 @@ export type WheelThemeKey =
     | 'casino'
     | 'pastel'
     | 'neon'
+    | 'royal'
     | 'gold'
     | 'ocean'
     | 'sunset'
@@ -112,6 +113,24 @@ export const WHEEL_THEMES: Record<WheelThemeKey, WheelTheme> = {
         pegOff: '#1e1b4b',
         sliceColors: ['#7c3aed', '#0b0d1f', '#22d3ee', '#0b0d1f', '#f0abfc', '#0b0d1f'],
         sliceTextColor: '#f5f3ff',
+    },
+    royal: {
+        key: 'royal',
+        label: 'Royal blue',
+        labelAr: 'ملكي أزرق',
+        background: '#d7e8f4',
+        surface: '#f4f8fc',
+        panel: 'rgba(190, 145, 76, 0.18)',
+        text: '#173a5d',
+        mutedText: '#476782',
+        accent: '#caa45b',
+        pointer: '#d8b16a',
+        rim: '#9f7a3f',
+        rimHighlight: '#f0dbaf',
+        pegOn: '#f6e08b',
+        pegOff: '#3a5570',
+        sliceColors: ['#1e5f98', '#e7f0f8', '#1f6aab', '#f1f6fb', '#225d8e'],
+        sliceTextColor: '#f8fbff',
     },
     gold: {
         key: 'gold',

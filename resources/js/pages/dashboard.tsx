@@ -1,25 +1,118 @@
-import { Head } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-import { dashboard } from '@/routes';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-export default function Dashboard() {
+type Wheel = {
+    id: number;
+    slug: string;
+    name: string;
+    brand_name: string;
+    address: string | null;
+    theme: string;
+    is_published: boolean;
+    items_count: number;
+    edit_url: string;
+};
+
+type DashboardProps = {
+    wheels: Wheel[];
+};
+
+export default function Dashboard({ wheels }: DashboardProps) {
+    const { auth } = usePage().props;
+
+    if (!auth.user) {
+        return null;
+    }
+
     return (
         <>
             <Head title="لوحة التحكم" />
-            <div className="mx-auto flex h-full w-full max-w-6xl flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+            <div className="min-h-svh bg-gradient-to-b from-neutral-950 to-neutral-900 px-4 py-12 text-neutral-100 sm:px-8">
+                <div className="mx-auto max-w-7xl">
+                    {/* Header */}
+                    <div className="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+                        <div>
+                            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                                عجلاتك
+                            </h1>
+                            <p className="mt-2 text-neutral-400">
+                                إدارة عجلات الجوائز الخاصة بك
+                            </p>
+                        </div>
+                        <Link href="/admin/wheels/create">
+                            <Button className="gap-2">
+                                <Plus className="size-4" />
+                                عجلة جديدة
+                            </Button>
+                        </Link>
                     </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+
+                    {/* Wheels Grid */}
+                    {wheels.length === 0 ? (
+                        <div className="rounded-2xl border border-dashed border-neutral-800 bg-neutral-900/50 p-12 text-center backdrop-blur">
+                            <p className="mb-6 text-neutral-400">لم تقم بإنشاء أي عجلات حتى الآن</p>
+                            <Link href="/admin/wheels/create">
+                                <Button variant="outline">
+                                    إنشاء عجلتك الأولى
+                                </Button>
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                            {wheels.map((wheel) => (
+                                <Link
+                                    key={wheel.id}
+                                    href={wheel.edit_url}
+                                    className="group block"
+                                >
+                                    <div className="overflow-hidden rounded-2xl border border-neutral-800 bg-gradient-to-br from-neutral-900 to-neutral-950 transition-all duration-300 hover:border-neutral-700 hover:shadow-lg hover:shadow-amber-500/20">
+                                        {/* Preview Area */}
+                                        <div className="flex aspect-square items-center justify-center bg-gradient-to-br from-neutral-800 via-neutral-900 to-neutral-950 p-6">
+                                            <div className="text-center">
+                                                <div className="mb-2 inline-flex h-12 w-12 items-center justify-center rounded-full bg-neutral-800">
+                                                    <span className="text-lg font-bold text-amber-400">
+                                                        {wheel.items_count}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-neutral-500">
+                                                    {wheel.items_count === 1 ? 'جائزة' : 'جوائز'}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Info Area */}
+                                        <div className="border-t border-neutral-800 p-4">
+                                            <h3 className="line-clamp-1 font-semibold text-white">
+                                                {wheel.name}
+                                            </h3>
+                                            {wheel.brand_name && (
+                                                <p className="mt-1 line-clamp-1 text-xs text-neutral-400">
+                                                    {wheel.brand_name}
+                                                </p>
+                                            )}
+                                            <div className="mt-3 flex items-center justify-between">
+                                                {wheel.address && (
+                                                    <p className="line-clamp-1 text-[10px] text-neutral-500">
+                                                        {wheel.address}
+                                                    </p>
+                                                )}
+                                                <span
+                                                    className={`whitespace-nowrap rounded-full px-2.5 py-0.5 text-[10px] font-medium ${
+                                                        wheel.is_published
+                                                            ? 'bg-green-500/20 text-green-400'
+                                                            : 'bg-neutral-800 text-neutral-400'
+                                                    }`}
+                                                >
+                                                    {wheel.is_published ? 'نشر' : 'مسودة'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </>
@@ -30,7 +123,7 @@ Dashboard.layout = {
     breadcrumbs: [
         {
             title: 'لوحة التحكم',
-            href: dashboard(),
+            href: '/dashboard',
         },
     ],
 };

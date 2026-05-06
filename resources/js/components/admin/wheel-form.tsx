@@ -1,6 +1,7 @@
 import { router, useForm } from '@inertiajs/react';
 import { GripVertical, ImagePlus, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useRef } from 'react';
+import { toast } from 'sonner';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -104,6 +105,9 @@ const POINTER_OPTIONS: { value: PointerStyle; label: string }[] = [
     { value: 'pin', label: 'دبوس' },
     { value: 'ball', label: 'كرة' },
     { value: 'diamond', label: 'ماسة' },
+    { value: 'needle', label: 'إبرة' },
+    { value: 'spear', label: 'رمح' },
+    { value: 'crown', label: 'تاج' },
 ];
 
 const PEG_OPTIONS: { value: PegStyle; label: string }[] = [
@@ -212,8 +216,17 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
         router.post(submitUrl, transform(data) as never, {
             forceFormData: true,
             preserveScroll: true,
+            onSuccess: () => {
+                form.clearErrors();
+                toast.success(method === 'put' ? 'تم حفظ التغييرات بنجاح.' : 'تم إنشاء العجلة بنجاح.');
+            },
             onError: (serverErrors) => {
                 form.setError(serverErrors as never);
+                const firstError = Object.values(serverErrors)
+                    .map((value) => (Array.isArray(value) ? value[0] : value))
+                    .find((value): value is string => typeof value === 'string' && value.length > 0);
+
+                toast.error(firstError ?? 'تعذر حفظ التغييرات. يرجى مراجعة أخطاء النموذج.');
             },
         });
     };
@@ -518,23 +531,73 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                         <InputError message={errors.hub_style} />
                     </div>
 
-                    <div className="grid gap-2">
-                        <Label>نمط المؤشر</Label>
-                        <Select
-                            value={data.pointer_style}
-                            onValueChange={(v) => setData('pointer_style', v as PointerStyle)}
-                        >
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {POINTER_OPTIONS.map((o) => (
-                                    <SelectItem key={o.value} value={o.value}>
-                                        {o.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                    <div className="grid gap-2 md:col-span-2">
+                        <Label>نمط المؤشر (واجهة بصرية من لوحة التحكم)</Label>
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
+                            {POINTER_OPTIONS.map((o) => {
+                                const selected = data.pointer_style === o.value;
+                                return (
+                                    <button
+                                        key={o.value}
+                                        type="button"
+                                        onClick={() => setData('pointer_style', o.value)}
+                                        className={`flex flex-col items-center gap-2 rounded-lg border p-2 text-xs transition ${
+                                            selected
+                                                ? 'border-primary bg-primary/10 text-primary'
+                                                : 'border-border bg-background hover:bg-muted/40'
+                                        }`}
+                                        aria-pressed={selected}
+                                    >
+                                        <span className="relative flex h-14 w-10 items-end justify-center rounded-md border border-border/70 bg-muted/20">
+                                            {(o.value === 'classic' || o.value === 'arrow' || o.value === 'spear') && (
+                                                <>
+                                                    <span className="absolute bottom-1 h-8 w-1 rounded-full bg-zinc-500" />
+                                                    <span className={`absolute top-1 ${o.value === 'arrow' ? 'h-0 w-0 border-r-[7px] border-l-[7px] border-b-[14px] border-r-transparent border-l-transparent border-b-amber-300' : o.value === 'spear' ? 'h-0 w-0 border-r-[6px] border-l-[6px] border-b-[16px] border-r-transparent border-l-transparent border-b-sky-300' : 'h-0 w-0 border-r-[8px] border-l-[8px] border-b-[12px] border-r-transparent border-l-transparent border-b-zinc-300'}`} />
+                                                </>
+                                            )}
+                                            {o.value === 'flag' && (
+                                                <>
+                                                    <span className="absolute bottom-1 h-9 w-1 rounded-full bg-zinc-500" />
+                                                    <span className="absolute top-3 left-5 h-0 w-0 border-t-[5px] border-b-[5px] border-l-[12px] border-t-transparent border-b-transparent border-l-amber-300" />
+                                                </>
+                                            )}
+                                            {o.value === 'triangle' && (
+                                                <span className="absolute top-2 h-0 w-0 border-r-[9px] border-l-[9px] border-b-[20px] border-r-transparent border-l-transparent border-b-zinc-200" />
+                                            )}
+                                            {o.value === 'pin' && (
+                                                <>
+                                                    <span className="absolute bottom-1 h-8 w-1 rounded-full bg-zinc-500" />
+                                                    <span className="absolute top-2 h-3 w-3 rounded-full border border-zinc-500 bg-rose-300" />
+                                                </>
+                                            )}
+                                            {o.value === 'ball' && (
+                                                <>
+                                                    <span className="absolute bottom-1 h-8 w-1 rounded-full bg-zinc-500" />
+                                                    <span className="absolute top-2 h-4 w-4 rounded-full border border-zinc-500 bg-sky-300" />
+                                                </>
+                                            )}
+                                            {o.value === 'diamond' && (
+                                                <span className="absolute top-2 h-0 w-0 border-t-[10px] border-r-[8px] border-b-[10px] border-l-[8px] border-t-transparent border-r-cyan-300 border-b-transparent border-l-cyan-300" />
+                                            )}
+                                            {o.value === 'needle' && (
+                                                <>
+                                                    <span className="absolute bottom-1 h-8 w-[2px] rounded-full bg-zinc-500" />
+                                                    <span className="absolute top-1 h-0 w-0 border-r-[4px] border-l-[4px] border-b-[16px] border-r-transparent border-l-transparent border-b-zinc-200" />
+                                                </>
+                                            )}
+                                            {o.value === 'crown' && (
+                                                <>
+                                                    <span className="absolute bottom-1 h-7 w-[2px] rounded-full bg-zinc-500" />
+                                                    <span className="absolute top-2 h-3 w-5 rounded-sm border border-amber-400 bg-amber-300/70" />
+                                                    <span className="absolute top-0 text-[10px] leading-none text-amber-400">▲ ▲</span>
+                                                </>
+                                            )}
+                                        </span>
+                                        <span className="font-medium">{o.label}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
                         <InputError message={errors.pointer_style} />
                     </div>
 
