@@ -21,7 +21,7 @@ export default function Login({
 }: Props) {
     return (
         <>
-            <Head title="تسجيل الدخول" />
+            <Head title="Login" />
 
             <Form
                 {...store.form()}
@@ -32,7 +32,7 @@ export default function Login({
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">البريد الإلكتروني</Label>
+                                <Label htmlFor="email">Email</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -48,14 +48,14 @@ export default function Login({
 
                             <div className="grid gap-2">
                                 <div className="flex items-center">
-                                    <Label htmlFor="password">كلمة المرور</Label>
+                                    <Label htmlFor="password">Password</Label>
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
                                             className="ms-auto text-sm"
                                             tabIndex={5}
                                         >
-                                            هل نسيت كلمة المرور؟
+                                            Forgot your password?
                                         </TextLink>
                                     )}
                                 </div>
@@ -65,7 +65,7 @@ export default function Login({
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder="كلمة المرور"
+                                    placeholder="Password"
                                 />
                                 <InputError message={errors.password} />
                             </div>
@@ -76,7 +76,7 @@ export default function Login({
                                     name="remember"
                                     tabIndex={3}
                                 />
-                                <Label htmlFor="remember">تذكّرني</Label>
+                                <Label htmlFor="remember">Remember me</Label>
                             </div>
 
                             <Button
@@ -87,7 +87,7 @@ export default function Login({
                                 data-test="login-button"
                             >
                                 {processing && <Spinner />}
-                                تسجيل الدخول
+                                Log in
                             </Button>
                         </div>
 
@@ -105,6 +105,6 @@ export default function Login({
 }
 
 Login.layout = {
-    title: 'تسجيل الدخول إلى حسابك',
-    description: 'أدخل بريدك الإلكتروني وكلمة المرور أدناه لتسجيل الدخول',
+    title: 'Log in to your account',
+    description: 'Enter your email and password below to log in',
 };

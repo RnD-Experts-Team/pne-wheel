@@ -47,12 +47,12 @@ export type WheelFormValues = {
 };
 
 const DEFAULT_ITEMS: WheelItemFormValue[] = [
-    { label: 'خصم 10٪', weight: 1 },
-    { label: 'مشروب مجاني', weight: 1 },
-    { label: 'حاول مرة أخرى', weight: 3 },
-    { label: 'قسيمة 5 ر.س', weight: 1 },
-    { label: 'هدية غامضة', weight: 1 },
-    { label: 'شكراً لك', weight: 3 },
+    { label: '10% Discount', weight: 1 },
+    { label: 'Free Drink', weight: 1 },
+    { label: 'Try Again', weight: 3 },
+    { label: 'SAR 5 Voucher', weight: 1 },
+    { label: 'Mystery Gift', weight: 1 },
+    { label: 'Thank You', weight: 3 },
 ];
 
 export function defaultCustomPalette() {
@@ -91,29 +91,29 @@ export function defaultWheelFormValues(): WheelFormValues {
 }
 
 const HUB_OPTIONS: { value: HubStyle; label: string }[] = [
-    { value: 'classic', label: 'كلاسيكي' },
-    { value: 'minimal', label: 'بسيط' },
-    { value: 'logo', label: 'الشعار' },
-    { value: 'starburst', label: 'انفجار نجمي' },
+    { value: 'classic', label: 'Classic' },
+    { value: 'minimal', label: 'Minimal' },
+    { value: 'logo', label: 'Logo' },
+    { value: 'starburst', label: 'Starburst' },
 ];
 
 const POINTER_OPTIONS: { value: PointerStyle; label: string }[] = [
-    { value: 'classic', label: 'كلاسيكي' },
-    { value: 'arrow', label: 'سهم' },
-    { value: 'flag', label: 'علم' },
-    { value: 'triangle', label: 'مثلث' },
-    { value: 'pin', label: 'دبوس' },
-    { value: 'ball', label: 'كرة' },
-    { value: 'diamond', label: 'ماسة' },
-    { value: 'needle', label: 'إبرة' },
-    { value: 'spear', label: 'رمح' },
-    { value: 'crown', label: 'تاج' },
+    { value: 'classic', label: 'Classic' },
+    { value: 'arrow', label: 'Arrow' },
+    { value: 'flag', label: 'Flag' },
+    { value: 'triangle', label: 'Triangle' },
+    { value: 'pin', label: 'Pin' },
+    { value: 'ball', label: 'Ball' },
+    { value: 'diamond', label: 'Diamond' },
+    { value: 'needle', label: 'Needle' },
+    { value: 'spear', label: 'Spear' },
+    { value: 'crown', label: 'Crown' },
 ];
 
 const PEG_OPTIONS: { value: PegStyle; label: string }[] = [
-    { value: 'dots', label: 'نقاط' },
-    { value: 'lights', label: 'أضواء متناوبة' },
-    { value: 'none', label: 'بدون' },
+    { value: 'dots', label: 'Dots' },
+    { value: 'lights', label: 'Alternating lights' },
+    { value: 'none', label: 'None' },
 ];
 
 type Props = {
@@ -134,7 +134,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
         () =>
             Object.values(WHEEL_THEMES).map((t) => ({
                 value: t.key,
-                label: t.labelAr,
+                label: t.label,
             })),
         [],
     );
@@ -218,7 +218,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
             preserveScroll: true,
             onSuccess: () => {
                 form.clearErrors();
-                toast.success(method === 'put' ? 'تم حفظ التغييرات بنجاح.' : 'تم إنشاء العجلة بنجاح.');
+                toast.success(method === 'put' ? 'Changes saved successfully.' : 'Wheel created successfully.');
             },
             onError: (serverErrors) => {
                 form.setError(serverErrors as never);
@@ -226,51 +226,50 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                     .map((value) => (Array.isArray(value) ? value[0] : value))
                     .find((value): value is string => typeof value === 'string' && value.length > 0);
 
-                toast.error(firstError ?? 'تعذر حفظ التغييرات. يرجى مراجعة أخطاء النموذج.');
+                toast.error(firstError ?? 'Could not save changes. Please check the form errors.');
             },
         });
     };
 
     const handleDelete = () => {
         if (!wheelSlug) return;
-        if (!confirm('هل تريد حذف هذه العجلة؟ لا يمكن التراجع عن هذا الإجراء.')) return;
+        if (!confirm('Delete this wheel? This action cannot be undone.')) return;
         router.delete(wheels.destroy(wheelSlug).url, { preserveScroll: false });
     };
 
     return (
         <form onSubmit={handleSubmit} className="space-y-10">
-            {/* أساسيات العجلة */}
+            {/* Wheel basics */}
             <section className="space-y-6">
                 <header className="space-y-1">
-                    <h2 className="text-base font-semibold tracking-tight">أساسيات العجلة</h2>
-                    <p className="text-sm text-muted-foreground">الاسم، رابط الـURL العام، وحالة النشر.</p>
+                    <h2 className="text-base font-semibold tracking-tight">Wheel basics</h2>
+                    <p className="text-sm text-muted-foreground">Name, public URL slug, and publish status.</p>
                 </header>
 
                 <div className="grid gap-6 md:grid-cols-2">
                     <div className="grid gap-2">
-                        <Label htmlFor="name">الاسم</Label>
+                        <Label htmlFor="name">Name</Label>
                         <Input
                             id="name"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
-                            placeholder="عجلة عرض الربيع"
+                            placeholder="Spring promo wheel"
                             required
                         />
                         <InputError message={errors.name} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="slug">رابط الـURL العام (اختياري)</Label>
+                        <Label htmlFor="slug">Public URL slug (optional)</Label>
                         <Input
                             id="slug"
                             value={data.slug}
                             onChange={(e) => setData('slug', e.target.value.toLowerCase())}
                             placeholder="spring-promo"
                             pattern="[a-z0-9\-]*"
-                            dir="ltr"
                         />
                         <p className="text-xs text-muted-foreground">
-                            يُولَّد تلقائياً من الاسم إذا تُرك فارغاً. أحرف لاتينية صغيرة، أرقام وشرطات فقط.
+                            Auto-generated from the name if left blank. Lowercase letters, numbers, and hyphens only.
                         </p>
                         <InputError message={errors.slug} />
                     </div>
@@ -281,45 +280,45 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                         checked={data.is_published}
                         onCheckedChange={(c) => setData('is_published', c === true)}
                     />
-                    <span>نشر — اجعل هذه العجلة قابلة للوصول من رابطها العام</span>
+                    <span>Publish — make this wheel accessible via its public URL</span>
                 </label>
             </section>
 
             <Separator />
 
-            {/* لوحة العلامة التجارية */}
+            {/* Brand panel */}
             <section className="space-y-6">
                 <header className="space-y-1">
-                    <h2 className="text-base font-semibold tracking-tight">لوحة العلامة التجارية</h2>
-                    <p className="text-sm text-muted-foreground">تظهر بجانب العجلة في الصفحة العامة.</p>
+                    <h2 className="text-base font-semibold tracking-tight">Brand panel</h2>
+                    <p className="text-sm text-muted-foreground">Shown beside the wheel on the public page.</p>
                 </header>
 
                 <div className="grid gap-6 md:grid-cols-2">
                     <div className="grid gap-2">
-                        <Label htmlFor="brand_name">اسم العلامة التجارية</Label>
+                        <Label htmlFor="brand_name">Brand name</Label>
                         <Input
                             id="brand_name"
                             value={data.brand_name}
                             onChange={(e) => setData('brand_name', e.target.value)}
-                            placeholder="كول مي للقهوة"
+                            placeholder="Cool Coffee Co."
                         />
                         <InputError message={errors.brand_name} />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label htmlFor="address">العنوان / الشعار</Label>
+                        <Label htmlFor="address">Address / tagline</Label>
                         <Input
                             id="address"
                             value={data.address}
                             onChange={(e) => setData('address', e.target.value)}
-                            placeholder="طريق قنوات"
+                            placeholder="Canal Road"
                         />
                         <InputError message={errors.address} />
                     </div>
                 </div>
 
                 <div className="grid gap-3">
-                    <Label>شعار العلامة (PNG أو SVG، حد أقصى 512 كيلوبايت)</Label>
+                    <Label>Brand logo (PNG or SVG, max 512 KB)</Label>
                     <div className="flex items-start gap-4">
                         {(data.brand_logo instanceof File || data.brand_logo_url) && !data.remove_brand_logo && (
                             <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-md border bg-muted">
@@ -329,7 +328,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                                             ? URL.createObjectURL(data.brand_logo)
                                             : (data.brand_logo_url ?? '')
                                     }
-                                    alt="شعار العلامة"
+                                    alt="Brand logo"
                                     className="max-h-full max-w-full"
                                 />
                             </div>
@@ -352,7 +351,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                                         setData('remove_brand_logo', true);
                                     }}
                                 >
-                                    إزالة الشعار الحالي
+                                    Remove current logo
                                 </button>
                             )}
                         </div>
@@ -363,16 +362,16 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
 
             <Separator />
 
-            {/* المظهر والسلوك */}
+            {/* Appearance & behaviour */}
             <section className="space-y-6">
                 <header className="space-y-1">
-                    <h2 className="text-base font-semibold tracking-tight">المظهر والسلوك</h2>
-                    <p className="text-sm text-muted-foreground">المظهر، نمط المحور، المؤشر، الأضواء، الصوت، والكونفيتي.</p>
+                    <h2 className="text-base font-semibold tracking-tight">Appearance & behaviour</h2>
+                    <p className="text-sm text-muted-foreground">Theme, hub style, pointer, rim lights, sound, and confetti.</p>
                 </header>
 
                 <div className="grid gap-6 md:grid-cols-2">
                     <div className="grid gap-2">
-                        <Label>المظهر</Label>
+                        <Label>Theme</Label>
                         <Select value={data.theme} onValueChange={(v) => setData('theme', v as WheelThemeKey)}>
                             <SelectTrigger>
                                 <SelectValue />
@@ -390,7 +389,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
 
                     {data.theme === 'brand' && (
                         <div className="grid gap-2">
-                            <Label htmlFor="brand_color">لون العلامة</Label>
+                            <Label htmlFor="brand_color">Brand color</Label>
                             <div className="flex items-center gap-2">
                                 <input
                                     id="brand_color"
@@ -404,7 +403,6 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                                     onChange={(e) => setData('brand_color', e.target.value)}
                                     placeholder="#3b82f6"
                                     pattern="#[0-9a-fA-F]{6}"
-                                    dir="ltr"
                                 />
                             </div>
                             <InputError message={errors.brand_color} />
@@ -415,20 +413,20 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                 {data.theme === 'custom' && (
                     <div className="rounded-lg border bg-card/40 p-4">
                         <header className="mb-4 space-y-1">
-                            <h3 className="text-sm font-semibold">لوحة الألوان المخصصة</h3>
+                            <h3 className="text-sm font-semibold">Custom colour palette</h3>
                             <p className="text-xs text-muted-foreground">
-                                اختر ألوان العجلة بدقة. اللون الأساسي يستخدم للزر، الإطار للحلقة الخارجية، والمؤشر للسهم.
+                                Fine-tune your wheel colours. Accent is used for the button, rim for the outer ring, and pointer for the arrow.
                             </p>
                         </header>
 
                         <div className="grid gap-3 md:grid-cols-3">
                             {([
-                                ['accent', 'اللون الأساسي'],
-                                ['rim', 'لون الإطار'],
-                                ['pointer', 'لون المؤشر'],
-                                ['textColor', 'لون النص'],
-                                ['background', 'الخلفية'],
-                                ['surface', 'لون اللوحة'],
+                                ['accent', 'Accent colour'],
+                                ['rim', 'Rim colour'],
+                                ['pointer', 'Pointer colour'],
+                                ['textColor', 'Text colour'],
+                                ['background', 'Background'],
+                                ['surface', 'Surface colour'],
                             ] as const).map(([key, label]) => (
                                 <label key={key} className="flex items-center gap-2 text-xs">
                                     <input
@@ -445,7 +443,6 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                                     <span className="flex-1">{label}</span>
                                     <span
                                         className="font-mono text-[10px] text-muted-foreground"
-                                        dir="ltr"
                                     >
                                         {data.custom_palette[key]}
                                     </span>
@@ -454,7 +451,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                         </div>
 
                         <div className="mt-4 space-y-2">
-                            <p className="text-xs font-medium">ألوان القطاعات</p>
+                            <p className="text-xs font-medium">Slice colours</p>
                             <div className="flex flex-wrap gap-2">
                                 {data.custom_palette.sliceColors.map((c, i) => (
                                     <div key={i} className="flex items-center gap-1 rounded-md border p-1">
@@ -484,7 +481,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                                                     });
                                                 }}
                                                 className="text-[10px] text-muted-foreground hover:text-destructive"
-                                                aria-label="حذف اللون"
+                                                aria-label="Remove colour"
                                             >
                                                 ✕
                                             </button>
@@ -502,7 +499,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                                         }
                                         className="rounded-md border border-dashed px-3 py-1 text-xs text-muted-foreground hover:bg-muted"
                                     >
-                                        + إضافة لون
+                                        + Add colour
                                     </button>
                                 )}
                             </div>
@@ -512,7 +509,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
 
                 <div className="grid gap-6 md:grid-cols-3">
                     <div className="grid gap-2">
-                        <Label>نمط المحور المركزي</Label>
+                        <Label>Hub style</Label>
                         <Select
                             value={data.hub_style}
                             onValueChange={(v) => setData('hub_style', v as HubStyle)}
@@ -532,7 +529,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                     </div>
 
                     <div className="grid gap-2 md:col-span-2">
-                        <Label>نمط المؤشر (واجهة بصرية من لوحة التحكم)</Label>
+                        <Label>Pointer style (visual preview from the dashboard)</Label>
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
                             {POINTER_OPTIONS.map((o) => {
                                 const selected = data.pointer_style === o.value;
@@ -602,7 +599,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                     </div>
 
                     <div className="grid gap-2">
-                        <Label>أضواء الحافة</Label>
+                        <Label>Rim lights</Label>
                         <Select
                             value={data.peg_style}
                             onValueChange={(v) => setData('peg_style', v as PegStyle)}
@@ -628,32 +625,32 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                             checked={data.sound_enabled}
                             onCheckedChange={(c) => setData('sound_enabled', c === true)}
                         />
-                        <span>المؤثرات الصوتية (نقرات + موسيقى الفوز)</span>
+                        <span>Sound effects (ticks + win music)</span>
                     </label>
                     <label className="flex items-center gap-3 text-sm">
                         <Checkbox
                             checked={data.confetti_enabled}
                             onCheckedChange={(c) => setData('confetti_enabled', c === true)}
                         />
-                        <span>كونفيتي عند الفوز</span>
+                        <span>Confetti on win</span>
                     </label>
                 </div>
             </section>
 
             <Separator />
 
-            {/* عناصر العجلة */}
+            {/* Wheel items */}
             <section className="space-y-6">
                 <header className="space-y-1">
-                    <h2 className="text-base font-semibold tracking-tight">عناصر العجلة</h2>
+                    <h2 className="text-base font-semibold tracking-tight">Wheel items</h2>
                     <p className="text-sm text-muted-foreground">
-                        كل عنصر يمثل قطاعاً. الوزن الأعلى = فرصة فوز أكبر. الصورة الصغيرة (PNG أو SVG ≤ 512 كيلوبايت) تظهر داخل القطاع.
+                        Each item represents a slice. Higher weight = higher win chance. A small image (PNG or SVG ≤ 512 KB) appears inside the slice.
                     </p>
                 </header>
 
                 <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
                     <div className="grid gap-2">
-                        <Label htmlFor="number_of_fields">عدد القطاعات الظاهرة (اختياري)</Label>
+                        <Label htmlFor="number_of_fields">Visible slices (optional)</Label>
                         <Input
                             id="number_of_fields"
                             type="number"
@@ -662,10 +659,9 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                             value={data.number_of_fields}
                             onChange={(e) => setData('number_of_fields', e.target.value)}
                             placeholder={`${data.items.length}`}
-                            dir="ltr"
                         />
                         <p className="text-xs text-muted-foreground">
-                            اتركه فارغاً ليُرسم قطاع واحد لكل عنصر. إذا كان أكبر، تتكرر العناصر لملء العجلة.
+                            Leave blank to draw one slice per item. If larger, items repeat to fill the wheel.
                         </p>
                         <InputError message={errors.number_of_fields} />
                     </div>
@@ -690,7 +686,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                                         onClick={() => moveItem(index, -1)}
                                         disabled={index === 0}
                                         className="text-muted-foreground hover:text-foreground disabled:opacity-30"
-                                        aria-label="نقل لأعلى"
+                                        aria-label="Move up"
                                     >
                                         <GripVertical className="size-4" />
                                     </button>
@@ -701,7 +697,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                                     <Input
                                         value={item.label}
                                         onChange={(e) => updateItem(index, { label: e.target.value })}
-                                        placeholder={`اسم العنصر ${index + 1}`}
+                                        placeholder={`Item ${index + 1} label`}
                                         required
                                     />
                                     <InputError message={errors[`items.${index}.label` as keyof typeof errors]} />
@@ -716,9 +712,8 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                                         onChange={(e) =>
                                             updateItem(index, { weight: Number(e.target.value) || 1 })
                                         }
-                                        placeholder="الوزن"
-                                        title="وزن احتمالية الفوز"
-                                        dir="ltr"
+                                        placeholder="Weight"
+                                        title="Win probability weight"
                                     />
                                     <InputError message={errors[`items.${index}.weight` as keyof typeof errors]} />
                                 </div>
@@ -743,7 +738,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                                             type="button"
                                             onClick={() => fileInputs.current[index]?.click()}
                                             className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-md border bg-muted"
-                                            title="استبدال الصورة"
+                                            title="Replace image"
                                         >
                                             <img
                                                 src={previewUrl}
@@ -757,7 +752,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                                             variant="outline"
                                             size="icon"
                                             onClick={() => fileInputs.current[index]?.click()}
-                                            title="إضافة صورة"
+                                            title="Add image"
                                         >
                                             <ImagePlus />
                                         </Button>
@@ -773,7 +768,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                                             }
                                             className="text-xs text-destructive underline-offset-4 hover:underline"
                                         >
-                                            إزالة
+                                            Remove
                                         </button>
                                     )}
                                 </div>
@@ -784,7 +779,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                                     size="icon"
                                     disabled={data.items.length <= 2}
                                     onClick={() => removeItem(index)}
-                                    title="حذف العنصر"
+                                    title="Delete item"
                                 >
                                     <Trash2 />
                                 </Button>
@@ -802,7 +797,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                     disabled={data.items.length >= 24}
                 >
                     <Plus />
-                    إضافة عنصر
+                    Add item
                 </Button>
             </section>
 
@@ -814,7 +809,7 @@ export default function WheelForm({ initial, submitUrl, method, submitLabel, whe
                 </Button>
                 {canDelete && wheelSlug && (
                     <Button type="button" variant="destructive" onClick={handleDelete}>
-                        حذف العجلة
+                        Delete wheel
                     </Button>
                 )}
             </div>

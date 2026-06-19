@@ -77,17 +77,17 @@ export default function WheelsEdit({ wheel }: { wheel: EditableWheel }) {
 
     return (
         <>
-            <Head title={`تعديل · ${wheel.name}`} />
+            <Head title={`Edit · ${wheel.name}`} />
             <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 p-4 md:p-6">
                 <div className="flex flex-wrap items-end justify-between gap-3">
-                    <Heading title={wheel.name} description="عدّل العناصر والمظهر ولوحة العلامة." />
+                    <Heading title={wheel.name} description="Edit items, appearance, and brand panel." />
                     <a
                         href={wheel.public_url}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
                     >
-                        فتح الصفحة العامة <ExternalLink className="size-3.5" />
+                        Open public page <ExternalLink className="size-3.5" />
                     </a>
                 </div>
 
@@ -95,7 +95,7 @@ export default function WheelsEdit({ wheel }: { wheel: EditableWheel }) {
                     initial={initial}
                     submitUrl={wheels.update(wheel.slug).url}
                     method="put"
-                    submitLabel="حفظ التغييرات"
+                    submitLabel="Save changes"
                     wheelSlug={wheel.slug}
                     canDelete
                 />
@@ -106,8 +106,8 @@ export default function WheelsEdit({ wheel }: { wheel: EditableWheel }) {
 
 WheelsEdit.layout = ({ wheel }: { wheel: EditableWheel }) => ({
     breadcrumbs: [
-        { title: 'لوحة التحكم', href: dashboard() },
-        { title: 'العجلات', href: wheels.index() },
+        { title: 'Dashboard', href: dashboard() },
+        { title: 'Wheels', href: wheels.index() },
         { title: wheel.name, href: wheels.edit(wheel.slug) },
     ],
 });

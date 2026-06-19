@@ -94,10 +94,10 @@ export default function WheelPage({ wheel, spinEndpoint }: Props) {
                     brandLogoUrl={wheel.brand_logo_url}
                     muted={muted}
                     labels={{
-                        spin: 'اضغط للدوران',
-                        spinning: 'جارٍ الدوران…',
-                        spinAgain: 'ادر مرة أخرى',
-                        hubText: 'ادِر',
+                        spin: 'Tap to spin',
+                        spinning: 'Spinning…',
+                        spinAgain: 'Spin again',
+                        hubText: 'SPIN',
                     }}
                     resolveWinner={resolveWinner}
                     onSpinComplete={onSpinComplete}
@@ -129,10 +129,10 @@ export default function WheelPage({ wheel, spinEndpoint }: Props) {
                 >
                     <DialogHeader className="text-center sm:text-center">
                         <DialogTitle className="text-3xl font-semibold tracking-tight">
-                            مبروك، لقد فزت!
+                            Congratulations, you won!
                         </DialogTitle>
                         <DialogDescription style={{ color: theme.mutedText }}>
-                            اعرض هذه الشاشة عند الكاشير لاستلام الجائزة.
+                            Show this screen at the cashier to claim your prize.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -163,7 +163,7 @@ export default function WheelPage({ wheel, spinEndpoint }: Props) {
                             }}
                             style={{ background: theme.accent, color: theme.background }}
                         >
-                            ادر مرة أخرى
+                            Spin again
                         </Button>
                     </DialogFooter>
                 </DialogContent>

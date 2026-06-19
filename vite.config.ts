@@ -15,9 +15,6 @@ export default defineConfig({
                 bunny('Instrument Sans', {
                     weights: [400, 500, 600],
                 }),
-                bunny('Cairo', {
-                    weights: [400, 500, 600, 700],
-                }),
             ],
         }),
         inertia(),

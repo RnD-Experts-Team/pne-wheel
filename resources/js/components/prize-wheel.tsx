@@ -928,7 +928,7 @@ export default function PrizeWheel({
                     boxShadow: `0 12px 30px ${theme.accent}55`,
                 }}
             >
-                {isSpinning ? (labels?.spinning ?? 'جارٍ الدوران…') : 'اضغط هنا'}
+                {isSpinning ? (labels?.spinning ?? 'Spinning…') : 'Tap to spin'}
             </button>
         </div>
     );

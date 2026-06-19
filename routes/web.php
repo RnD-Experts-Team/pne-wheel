@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\WheelController as AdminWheelController;
 use App\Http\Controllers\PublicWheelLandingController;
 use App\Http\Controllers\WheelController;
@@ -19,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('wheels', AdminWheelController::class)->except(['show']);
+        Route::resource('users', AdminUserController::class)->only(['index', 'create', 'store', 'destroy']);
     });
 });
 

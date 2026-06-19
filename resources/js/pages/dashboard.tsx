@@ -27,23 +27,23 @@ export default function Dashboard({ wheels }: DashboardProps) {
 
     return (
         <>
-            <Head title="لوحة التحكم" />
+            <Head title="Dashboard" />
             <div className="min-h-svh bg-gradient-to-b from-neutral-950 to-neutral-900 px-4 py-12 text-neutral-100 sm:px-8">
                 <div className="mx-auto max-w-7xl">
                     {/* Header */}
                     <div className="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
                         <div>
                             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-                                عجلاتك
+                                Your Wheels
                             </h1>
                             <p className="mt-2 text-neutral-400">
-                                إدارة عجلات الجوائز الخاصة بك
+                                Manage your reward wheels
                             </p>
                         </div>
                         <Link href="/admin/wheels/create">
                             <Button className="gap-2">
                                 <Plus className="size-4" />
-                                عجلة جديدة
+                                New Wheel
                             </Button>
                         </Link>
                     </div>
@@ -51,10 +51,10 @@ export default function Dashboard({ wheels }: DashboardProps) {
                     {/* Wheels Grid */}
                     {wheels.length === 0 ? (
                         <div className="rounded-2xl border border-dashed border-neutral-800 bg-neutral-900/50 p-12 text-center backdrop-blur">
-                            <p className="mb-6 text-neutral-400">لم تقم بإنشاء أي عجلات حتى الآن</p>
+                            <p className="mb-6 text-neutral-400">You haven't created any wheels yet</p>
                             <Link href="/admin/wheels/create">
                                 <Button variant="outline">
-                                    إنشاء عجلتك الأولى
+                                    Create your first wheel
                                 </Button>
                             </Link>
                         </div>
@@ -76,7 +76,7 @@ export default function Dashboard({ wheels }: DashboardProps) {
                                                     </span>
                                                 </div>
                                                 <p className="text-xs text-neutral-500">
-                                                    {wheel.items_count === 1 ? 'جائزة' : 'جوائز'}
+                                                    {wheel.items_count === 1 ? 'prize' : 'prizes'}
                                                 </p>
                                             </div>
                                         </div>
@@ -104,7 +104,7 @@ export default function Dashboard({ wheels }: DashboardProps) {
                                                             : 'bg-neutral-800 text-neutral-400'
                                                     }`}
                                                 >
-                                                    {wheel.is_published ? 'نشر' : 'مسودة'}
+                                                    {wheel.is_published ? 'Published' : 'Draft'}
                                                 </span>
                                             </div>
                                         </div>
@@ -122,7 +122,7 @@ export default function Dashboard({ wheels }: DashboardProps) {
 Dashboard.layout = {
     breadcrumbs: [
         {
-            title: 'لوحة التحكم',
+            title: 'Dashboard',
             href: '/dashboard',
         },
     ],

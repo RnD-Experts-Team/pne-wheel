@@ -6,7 +6,19 @@
       "Bash(PGPASSWORD='Rag123456@@' psql -U raghd -h 127.0.0.1 -d callme-wheel -c \"\\\\dt\")",
       "Bash(vendor/bin/pint --dirty --format agent)",
       "Bash(npm run *)",
-      "Bash(vendor/bin/pint --format agent)"
+      "Bash(vendor/bin/pint --format agent)",
+      "Bash(composer install *)",
+      "Bash(python3 -m json.tool)",
+      "Bash(npm install *)",
+      "mcp__Claude_in_Chrome__list_connected_browsers",
+      "mcp__Claude_in_Chrome__select_browser",
+      "mcp__Claude_in_Chrome__navigate",
+      "mcp__Claude_in_Chrome__browser_batch",
+      "mcp__Claude_in_Chrome__read_console_messages",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_fill_form",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot"
     ]
   }
 }

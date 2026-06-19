@@ -24,23 +24,23 @@ export default function WheelsIndex({ wheels: rows }: { wheels: WheelRow[] }) {
     const [, copy] = useClipboard();
 
     const handleDelete = (row: WheelRow) => {
-        if (!confirm(`هل تريد حذف "${row.name}"؟ لا يمكن التراجع.`)) return;
+        if (!confirm(`Delete "${row.name}"? This cannot be undone.`)) return;
         router.delete(wheels.destroy(row.slug).url, {
             preserveScroll: true,
-            onSuccess: () => toast.success('تم حذف العجلة'),
+            onSuccess: () => toast.success('Wheel deleted'),
         });
     };
 
     return (
         <>
-            <Head title="العجلات" />
+            <Head title="Wheels" />
             <div className="mx-auto flex h-full w-full max-w-6xl flex-1 flex-col gap-6 p-4 md:p-6">
                 <div className="flex flex-wrap items-end justify-between gap-3">
-                    <Heading title="العجلات" description="أنشئ وأدر عجلات الجوائز العامة." />
+                    <Heading title="Wheels" description="Create and manage your public reward wheels." />
                     <Button asChild>
                         <Link href={wheels.create()}>
                             <Plus />
-                            عجلة جديدة
+                            New Wheel
                         </Link>
                     </Button>
                 </div>
@@ -48,12 +48,12 @@ export default function WheelsIndex({ wheels: rows }: { wheels: WheelRow[] }) {
                 {rows.length === 0 ? (
                     <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-dashed p-10 text-center">
                         <p className="text-sm text-muted-foreground">
-                            لم تنشئ أي عجلة بعد.
+                            You haven't created any wheels yet.
                         </p>
                         <Button asChild>
                             <Link href={wheels.create()}>
                                 <Plus />
-                                أنشئ عجلتك الأولى
+                                Create your first wheel
                             </Link>
                         </Button>
                     </div>
@@ -62,11 +62,11 @@ export default function WheelsIndex({ wheels: rows }: { wheels: WheelRow[] }) {
                         <table className="w-full text-sm">
                             <thead className="bg-muted/50 text-start text-xs uppercase tracking-wide text-muted-foreground">
                                 <tr>
-                                    <th className="px-4 py-3 text-start font-medium">الاسم</th>
-                                    <th className="px-4 py-3 text-start font-medium">المظهر</th>
-                                    <th className="px-4 py-3 text-start font-medium">العناصر</th>
-                                    <th className="px-4 py-3 text-start font-medium">الحالة</th>
-                                    <th className="px-4 py-3 text-start font-medium">الرابط العام</th>
+                                    <th className="px-4 py-3 text-start font-medium">Name</th>
+                                    <th className="px-4 py-3 text-start font-medium">Theme</th>
+                                    <th className="px-4 py-3 text-start font-medium">Items</th>
+                                    <th className="px-4 py-3 text-start font-medium">Status</th>
+                                    <th className="px-4 py-3 text-start font-medium">Public URL</th>
                                     <th className="px-4 py-3" />
                                 </tr>
                             </thead>
@@ -80,7 +80,7 @@ export default function WheelsIndex({ wheels: rows }: { wheels: WheelRow[] }) {
                                         </td>
                                         <td className="px-4 py-3">
                                             <Badge variant={row.is_published ? 'default' : 'secondary'}>
-                                                {row.is_published ? 'منشورة' : 'مسودة'}
+                                                {row.is_published ? 'Published' : 'Draft'}
                                             </Badge>
                                         </td>
                                         <td className="px-4 py-3">
@@ -90,7 +90,6 @@ export default function WheelsIndex({ wheels: rows }: { wheels: WheelRow[] }) {
                                                     target="_blank"
                                                     rel="noreferrer"
                                                     className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-                                                    dir="ltr"
                                                 >
                                                     /w/{row.slug}
                                                     <ExternalLink className="size-3" />
@@ -102,9 +101,9 @@ export default function WheelsIndex({ wheels: rows }: { wheels: WheelRow[] }) {
                                                     className="size-7"
                                                     onClick={() => {
                                                         copy(row.public_url);
-                                                        toast.success('تم نسخ الرابط');
+                                                        toast.success('Link copied');
                                                     }}
-                                                    title="نسخ الرابط"
+                                                    title="Copy link"
                                                 >
                                                     <Copy className="size-3.5" />
                                                 </Button>
@@ -140,7 +139,7 @@ export default function WheelsIndex({ wheels: rows }: { wheels: WheelRow[] }) {
 
 WheelsIndex.layout = {
     breadcrumbs: [
-        { title: 'لوحة التحكم', href: dashboard() },
-        { title: 'العجلات', href: wheels.index() },
+        { title: 'Dashboard', href: dashboard() },
+        { title: 'Wheels', href: wheels.index() },
     ],
 };

@@ -10,10 +10,10 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         User::query()->updateOrCreate(
-            ['email' => env('ADMIN_EMAIL', 'admin@callme.wheels')],
+            ['email' => env('ADMIN_EMAIL', 'admin@pneunited.com')],
             [
-                'name' => 'Callme Admin',
-                'password' => env('ADMIN_PASSWORD', 'Callme123456!'),
+                'name' => 'PNE Admin',
+                'password' => env('ADMIN_PASSWORD', 'PNEWheel@2026'),
                 'email_verified_at' => now(),
             ],
         );
