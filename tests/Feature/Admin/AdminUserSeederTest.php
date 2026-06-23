@@ -16,11 +16,11 @@ class AdminUserSeederTest extends TestCase
     {
         $this->seed(AdminUserSeeder::class);
 
-        $admin = User::query()->where('email', 'admin@callme.wheels')->first();
+        $admin = User::query()->where('email', env('ADMIN_EMAIL', 'admin@pneunited.com'))->first();
 
         $this->assertNotNull($admin);
-        $this->assertSame('Callme Admin', $admin->name);
-        $this->assertTrue(Hash::check('Callme123456!', $admin->password));
+        $this->assertSame('PNE Admin', $admin->name);
+        $this->assertTrue(Hash::check(env('ADMIN_PASSWORD', 'PNEWheel@2026'), $admin->password));
         $this->assertNotNull($admin->email_verified_at);
     }
 }

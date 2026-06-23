@@ -1,0 +1,91 @@
+- generic [ref=e2]:
+  - generic [ref=e34]:
+    - generic [ref=e38]:
+      - list [ref=e40]:
+        - listitem [ref=e41]:
+          - link "PNE Wheel" [ref=e42] [cursor=pointer]:
+            - /url: /dashboard
+            - generic [ref=e44]: PNE Wheel
+      - generic [ref=e46]:
+        - generic [ref=e47]: Platform
+        - list [ref=e48]:
+          - listitem [ref=e49]:
+            - link "Wheels" [ref=e50] [cursor=pointer]:
+              - /url: /dashboard
+              - img [ref=e51]
+              - generic [ref=e60]: Wheels
+          - listitem [ref=e61]:
+            - link "Create Wheel" [ref=e62] [cursor=pointer]:
+              - /url: /admin/wheels/create
+              - img [ref=e63]
+              - generic [ref=e64]: Create Wheel
+          - listitem [ref=e65]:
+            - link "Users" [ref=e66] [cursor=pointer]:
+              - /url: /admin/users
+              - img [ref=e67]
+              - generic [ref=e72]: Users
+      - generic [ref=e73]:
+        - generic [ref=e74]:
+          - generic:
+            - list
+        - list [ref=e75]:
+          - listitem [ref=e76]:
+            - button "PA PNE Admin" [ref=e77]:
+              - generic [ref=e79]: PA
+              - generic [ref=e81]: PNE Admin
+              - img [ref=e82]
+    - main [ref=e85]:
+      - generic [ref=e87]:
+        - button "Toggle sidebar" [ref=e88]:
+          - img
+          - generic [ref=e89]: Toggle sidebar
+        - navigation "breadcrumb" [ref=e90]:
+          - list [ref=e91]:
+            - listitem [ref=e92]:
+              - link "Dashboard" [ref=e93] [cursor=pointer]:
+                - /url: /dashboard
+            - listitem [ref=e94]:
+              - img [ref=e95]
+            - listitem [ref=e97]:
+              - link "Wheels" [disabled] [ref=e98]
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - generic [ref=e101]:
+            - heading "Wheels" [level=2] [ref=e102]
+            - paragraph [ref=e103]: Create and manage your public reward wheels.
+          - link "New Wheel" [ref=e104] [cursor=pointer]:
+            - /url: /admin/wheels/create
+            - img
+            - text: New Wheel
+        - table [ref=e106]:
+          - rowgroup [ref=e107]:
+            - row "Name Theme Items Status Public URL" [ref=e108]:
+              - columnheader "Name" [ref=e109]
+              - columnheader "Theme" [ref=e110]
+              - columnheader "Items" [ref=e111]
+              - columnheader "Status" [ref=e112]
+              - columnheader "Public URL" [ref=e113]
+              - columnheader [ref=e114]
+          - rowgroup [ref=e115]:
+            - row "Test neon 6 Published /w/test" [ref=e116]:
+              - cell "Test" [ref=e117]
+              - cell "neon" [ref=e118]
+              - cell "6" [ref=e119]
+              - cell "Published" [ref=e120]:
+                - generic [ref=e121]: Published
+              - cell "/w/test" [ref=e122]:
+                - generic [ref=e123]:
+                  - link "/w/test" [ref=e124] [cursor=pointer]:
+                    - /url: http://127.0.0.1:8000/w/test
+                    - text: /w/test
+                    - img [ref=e125]
+                  - button "Copy link" [ref=e129]:
+                    - img
+              - cell [ref=e130]:
+                - generic [ref=e131]:
+                  - link [ref=e132] [cursor=pointer]:
+                    - /url: http://127.0.0.1:8000/admin/wheels/test/edit
+                    - img
+                  - button [ref=e133]:
+                    - img
+  - region "Notifications alt+T"

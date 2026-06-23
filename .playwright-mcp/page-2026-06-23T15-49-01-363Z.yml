@@ -1,0 +1,250 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e7]:
+      - list [ref=e9]:
+        - listitem [ref=e10]:
+          - link "PNE Wheel" [ref=e11] [cursor=pointer]:
+            - /url: /dashboard
+            - generic [ref=e13]: PNE Wheel
+      - generic [ref=e15]:
+        - generic [ref=e16]: Platform
+        - list [ref=e17]:
+          - listitem [ref=e18]:
+            - link "Wheels" [ref=e19] [cursor=pointer]:
+              - /url: /dashboard
+              - img [ref=e20]
+              - generic [ref=e29]: Wheels
+          - listitem [ref=e30]:
+            - link "Create Wheel" [ref=e31] [cursor=pointer]:
+              - /url: /admin/wheels/create
+              - img [ref=e32]
+              - generic [ref=e33]: Create Wheel
+          - listitem [ref=e34]:
+            - link "Users" [ref=e35] [cursor=pointer]:
+              - /url: /admin/users
+              - img [ref=e36]
+              - generic [ref=e41]: Users
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic:
+            - list
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - button "PA PNE Admin" [ref=e46]:
+              - generic [ref=e48]: PA
+              - generic [ref=e50]: PNE Admin
+              - img [ref=e51]
+    - main [ref=e54]:
+      - generic [ref=e56]:
+        - button "Toggle sidebar" [ref=e57]:
+          - img
+          - generic [ref=e58]: Toggle sidebar
+        - navigation "breadcrumb" [ref=e59]:
+          - list [ref=e60]:
+            - listitem [ref=e61]:
+              - link "Dashboard" [ref=e62] [cursor=pointer]:
+                - /url: /dashboard
+            - listitem [ref=e63]:
+              - img [ref=e64]
+            - listitem [ref=e66]:
+              - link "Wheels" [ref=e67] [cursor=pointer]:
+                - /url: /admin/wheels
+            - listitem [ref=e68]:
+              - img [ref=e69]
+            - listitem [ref=e71]:
+              - link "Test" [disabled] [ref=e72]
+      - generic [ref=e73]:
+        - generic [ref=e74]:
+          - generic [ref=e75]:
+            - heading "Test" [level=2] [ref=e76]
+            - paragraph [ref=e77]: Edit items, appearance, and brand panel.
+          - link "Open public page" [ref=e78] [cursor=pointer]:
+            - /url: http://127.0.0.1:8000/w/test
+            - text: Open public page
+            - img [ref=e79]
+        - generic [ref=e83]:
+          - generic [ref=e84]:
+            - generic [ref=e85]:
+              - heading "Wheel basics" [level=2] [ref=e86]
+              - paragraph [ref=e87]: Name, public URL slug, and publish status.
+            - generic [ref=e88]:
+              - generic [ref=e89]:
+                - generic [ref=e90]: Name
+                - textbox "Name" [ref=e91]:
+                  - /placeholder: Spring promo wheel
+                  - text: Test
+              - generic [ref=e92]:
+                - generic [ref=e93]: Public URL slug (optional)
+                - textbox "Public URL slug (optional)" [ref=e94]:
+                  - /placeholder: spring-promo
+                  - text: test
+                - paragraph [ref=e95]: Auto-generated from the name if left blank. Lowercase letters, numbers, and hyphens only.
+            - generic [ref=e96]:
+              - checkbox "Publish — make this wheel accessible via its public URL" [checked] [ref=e97]:
+                - generic:
+                  - img
+              - checkbox [checked]
+              - generic [ref=e98]: Publish — make this wheel accessible via its public URL
+          - generic [ref=e99]:
+            - generic [ref=e100]:
+              - heading "Brand panel" [level=2] [ref=e101]
+              - paragraph [ref=e102]: Shown beside the wheel on the public page.
+            - generic [ref=e103]:
+              - generic [ref=e104]:
+                - generic [ref=e105]: Brand name
+                - textbox "Brand name" [ref=e106]:
+                  - /placeholder: Cool Coffee Co.
+                  - text: PNE
+              - generic [ref=e107]:
+                - generic [ref=e108]: Address / tagline
+                - textbox "Address / tagline" [ref=e109]:
+                  - /placeholder: Canal Road
+            - generic [ref=e110]:
+              - generic [ref=e111]: Brand logo (PNG or SVG, max 512 KB)
+              - generic [ref=e112]:
+                - img "Brand logo" [ref=e114]
+                - generic [ref=e115]:
+                  - button "Choose File" [ref=e116]
+                  - button "Remove current logo" [ref=e117]
+          - generic [ref=e118]:
+            - generic [ref=e119]:
+              - heading "Appearance & behaviour" [level=2] [ref=e120]
+              - paragraph [ref=e121]: Theme, hub style, pointer, rim lights, sound, and confetti.
+            - generic [ref=e123]:
+              - generic [ref=e124]: Theme
+              - combobox [ref=e125]:
+                - generic: Neon
+                - img
+              - combobox [ref=e126]
+            - generic [ref=e127]:
+              - generic [ref=e128]:
+                - generic [ref=e129]: Hub style
+                - combobox [ref=e130]:
+                  - generic: Logo
+                  - img
+                - combobox [ref=e131]
+              - generic [ref=e132]:
+                - generic [ref=e133]: Pointer style (visual preview from the dashboard)
+                - generic [ref=e134]:
+                  - button "Classic" [ref=e135]:
+                    - generic [ref=e139]: Classic
+                  - button "Arrow" [pressed] [ref=e140]:
+                    - generic [ref=e144]: Arrow
+                  - button "Flag" [ref=e145]:
+                    - generic [ref=e149]: Flag
+                  - button "Triangle" [ref=e150]:
+                    - generic [ref=e153]: Triangle
+                  - button "Pin" [ref=e154]:
+                    - generic [ref=e158]: Pin
+                  - button "Ball" [ref=e159]:
+                    - generic [ref=e163]: Ball
+                  - button "Diamond" [ref=e164]:
+                    - generic [ref=e167]: Diamond
+                  - button "Needle" [ref=e168]:
+                    - generic [ref=e172]: Needle
+                  - button "Spear" [ref=e173]:
+                    - generic [ref=e177]: Spear
+                  - button "▲ ▲ Crown" [ref=e178]:
+                    - generic [ref=e182]: ▲ ▲
+                    - generic [ref=e183]: Crown
+              - generic [ref=e184]:
+                - generic [ref=e185]: Rim lights
+                - combobox [ref=e186]:
+                  - generic: Dots
+                  - img
+                - combobox [ref=e187]
+            - generic [ref=e188]:
+              - generic [ref=e189]:
+                - checkbox "Sound effects (ticks + win music)" [checked] [ref=e190]:
+                  - generic:
+                    - img
+                - checkbox [checked]
+                - generic [ref=e191]: Sound effects (ticks + win music)
+              - generic [ref=e192]:
+                - checkbox "Confetti on win" [checked] [ref=e193]:
+                  - generic:
+                    - img
+                - checkbox [checked]
+                - generic [ref=e194]: Confetti on win
+          - generic [ref=e195]:
+            - generic [ref=e196]:
+              - heading "Wheel items" [level=2] [ref=e197]
+              - paragraph [ref=e198]: Each item represents a slice. Higher weight = higher win chance. A small image (PNG or SVG ≤ 512 KB) appears inside the slice.
+            - generic [ref=e200]:
+              - generic [ref=e201]: Visible slices (optional)
+              - spinbutton "Visible slices (optional)" [ref=e202]
+              - paragraph [ref=e203]: Leave blank to draw one slice per item. If larger, items repeat to fill the wheel.
+            - generic [ref=e204]:
+              - generic [ref=e205]:
+                - generic [ref=e206]:
+                  - button "Move up" [disabled] [ref=e207]:
+                    - img [ref=e208]
+                  - generic [ref=e215]: "#1"
+                - textbox "Item 1 label" [ref=e217]: 10% Discount
+                - spinbutton "Win probability weight" [ref=e219]: "1"
+                - button "Add image" [ref=e221]:
+                  - img
+                - button "Delete item" [ref=e222]:
+                  - img
+              - generic [ref=e223]:
+                - generic [ref=e224]:
+                  - button "Move up" [ref=e225]:
+                    - img [ref=e226]
+                  - generic [ref=e233]: "#2"
+                - textbox "Item 2 label" [ref=e235]: Free Drink
+                - spinbutton "Win probability weight" [ref=e237]: "1"
+                - button "Add image" [ref=e239]:
+                  - img
+                - button "Delete item" [ref=e240]:
+                  - img
+              - generic [ref=e241]:
+                - generic [ref=e242]:
+                  - button "Move up" [ref=e243]:
+                    - img [ref=e244]
+                  - generic [ref=e251]: "#3"
+                - textbox "Item 3 label" [ref=e253]: Try Again
+                - spinbutton "Win probability weight" [ref=e255]: "3"
+                - button "Add image" [ref=e257]:
+                  - img
+                - button "Delete item" [ref=e258]:
+                  - img
+              - generic [ref=e259]:
+                - generic [ref=e260]:
+                  - button "Move up" [ref=e261]:
+                    - img [ref=e262]
+                  - generic [ref=e269]: "#4"
+                - textbox "Item 4 label" [ref=e271]: SAR 5 Voucher
+                - spinbutton "Win probability weight" [ref=e273]: "1"
+                - button "Add image" [ref=e275]:
+                  - img
+                - button "Delete item" [ref=e276]:
+                  - img
+              - generic [ref=e277]:
+                - generic [ref=e278]:
+                  - button "Move up" [ref=e279]:
+                    - img [ref=e280]
+                  - generic [ref=e287]: "#5"
+                - textbox "Item 5 label" [ref=e289]: Mystery Gift
+                - spinbutton "Win probability weight" [ref=e291]: "1"
+                - button "Add image" [ref=e293]:
+                  - img
+                - button "Delete item" [ref=e294]:
+                  - img
+              - generic [ref=e295]:
+                - generic [ref=e296]:
+                  - button "Move up" [ref=e297]:
+                    - img [ref=e298]
+                  - generic [ref=e305]: "#6"
+                - textbox "Item 6 label" [ref=e307]: Thank You
+                - spinbutton "Win probability weight" [ref=e309]: "3"
+                - button "Add image" [ref=e311]:
+                  - img
+                - button "Delete item" [ref=e312]:
+                  - img
+            - button "Add item" [ref=e313]:
+              - img
+              - text: Add item
+          - generic [ref=e314]:
+            - button "Save changes" [ref=e315]
+            - button "Delete wheel" [ref=e316]
+  - region "Notifications alt+T"
