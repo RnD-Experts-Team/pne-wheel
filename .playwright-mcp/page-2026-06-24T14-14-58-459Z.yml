@@ -1,0 +1,34 @@
+- generic:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - img:
+            - generic:
+              - generic: 10% Discount
+            - generic:
+              - generic: Free Drink
+            - generic:
+              - generic: Try Again
+            - generic:
+              - generic: SAR 5Voucher
+            - generic:
+              - generic: Mystery Gift
+            - generic:
+              - generic: Thank You
+          - generic:
+            - img
+          - generic:
+            - button:
+              - generic: Spin again
+        - button: Tap to spin
+    - region "Notifications alt+T"
+  - dialog "Congratulations, you won!" [ref=e53]:
+    - generic [ref=e54]:
+      - heading "Congratulations, you won!" [level=2] [ref=e55]
+      - paragraph [ref=e56]: Show this screen at the cashier to claim your prize.
+    - generic [ref=e58]: Try Again
+    - button "Spin again" [active] [ref=e60]
+    - button "Close" [ref=e61]:
+      - img
+      - generic [ref=e62]: Close

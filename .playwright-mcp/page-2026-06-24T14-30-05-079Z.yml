@@ -1,0 +1,16 @@
+- generic [ref=e2]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e6]:
+        - generic [ref=e13]: 10% Discount
+        - generic [ref=e16]: Free Drink
+        - generic [ref=e19]: Try Again
+        - generic [ref=e22]: SAR 5Voucher
+        - generic [ref=e25]: Mystery Gift
+        - generic [ref=e28]: Thank You
+      - generic:
+        - img
+      - button "Spin again" [ref=e78]:
+        - generic [ref=e46]: Spin again
+    - button "Tap to spin" [ref=e79]
+  - region "Notifications alt+T"

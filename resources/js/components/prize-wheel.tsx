@@ -328,9 +328,9 @@ export default function PrizeWheel({
             const targetIndex = ((index % sliceCount) + sliceCount) % sliceCount;
             const jitter = (Math.random() - 0.5) * sliceAngleDeg * 0.3;
             const settle = -targetIndex * sliceAngleDeg + jitter;
-            const dynamicRotations = FULL_ROTATIONS + Math.random() * 1.75;
+            const fullRotations = FULL_ROTATIONS + Math.floor(Math.random() * 4); // integer only — fractional rotations shift the landing angle
             const spinDuration = SPIN_DURATION + Math.min(1.1, sliceCount * 0.022) + Math.random() * 0.35;
-            const next = rotation + dynamicRotations * 360 + (settle - (rotation % 360));
+            const next = rotation + fullRotations * 360 + (settle - (rotation % 360));
 
             driveTicks(rotation, next, spinDuration * 1000);
 
