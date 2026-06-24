@@ -1,6 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { Volume2, VolumeX } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import ConfettiBurst from '@/components/confetti-burst';
 import PrizeWheel, {
     type HubStyle,
@@ -44,6 +44,8 @@ export default function WheelPage({ wheel, spinEndpoint }: Props) {
     const [muted, setMuted] = useState(!wheel.sound_enabled);
     const [winner, setWinner] = useState<PrizeWheelItem | null>(null);
     const [confettiActive, setConfettiActive] = useState(false);
+    // Store the authoritative item from the backend so the popup always reflects the server's choice.
+    const backendItemRef = useRef<PrizeWheelItem | null>(null);
 
     const resolveWinner = useCallback(async (): Promise<{ index: number }> => {
         const csrfToken =
@@ -63,12 +65,14 @@ export default function WheelPage({ wheel, spinEndpoint }: Props) {
         if (!res.ok) {
             throw new Error(`Spin request failed: ${res.status}`);
         }
-        return (await res.json()) as { index: number };
+        const data = (await res.json()) as { index: number; item: PrizeWheelItem };
+        backendItemRef.current = data.item;
+        return { index: data.index };
     }, [spinEndpoint]);
 
     const onSpinComplete = useCallback(
-        (won: PrizeWheelItem) => {
-            setWinner(won);
+        (_won: PrizeWheelItem) => {
+            setWinner(backendItemRef.current);
             if (wheel.confetti_enabled) {
                 setConfettiActive(true);
                 window.setTimeout(() => setConfettiActive(false), 3500);
